@@ -20,9 +20,9 @@ igvmgen -h
 ### Real Python code:
 
 * igvm/vmstate.py: for configuring VMSA registers
-* igvm/igvmbase.py: for generating IGVM image
-* igvm/igvmbzimage.py: for generating IGVM image from  bzImage
-* igvm/igvmelf.py: for generating IGVM image from arbitrary ELF
+* igvm/igvmbase.py: for generating an IGVM image
+* igvm/igvmbzimage.py: for generating an IGVM image from a bzImage
+* igvm/igvmelf.py: for generating an IGVM image from an arbitrary ELF
 * igvm/acpi.py: for convert ACPI table to memory snapshot
 
 ## Date
@@ -36,7 +36,6 @@ pytest-3 test
 ```
 
 ## Coverage
-
 ```
 coverage run --source igvm -m pytest
 coverage report -m

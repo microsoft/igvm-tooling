@@ -20,12 +20,12 @@ class IGVMBaseGenerator(object):
                               config_path=config,  pem = pem)
 
     @abstractclassmethod
-    def setup_acpi(self, **kwargs):
+    def setup_before_code(self, **kwargs):
         """Set up memory before code"""
         pass
 
     @abstractclassmethod
-    def setup_boot(self, kernel_entry: int, **kwargs):
+    def setup_after_code(self, kernel_entry: int, **kwargs):
         """Set up memory after code"""
         pass
 
@@ -36,7 +36,7 @@ class IGVMBaseGenerator(object):
 
     def generate(self):
         # ACPI
-        self.setup_acpi()
+        self.setup_before_code()
 
         # for CPUID/secrets/param pages
         self.state.seek(self.SNP_CPUID_PAGE_ADDR)
@@ -49,6 +49,6 @@ class IGVMBaseGenerator(object):
         kernel_entry = self.load_code()
 
         # Allocate gdt, boot_params, cmdline and ramdisk pages
-        self.setup_boot(kernel_entry)
+        self.setup_after_code(kernel_entry)
         return self.state.raw(
             vmsa_page, cpuid_page, secrets_page, param_page, self._vtl)

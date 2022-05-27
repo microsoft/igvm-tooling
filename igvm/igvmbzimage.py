@@ -169,7 +169,7 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
             logging.debug("%x %x"%(e820_table[i].addr, e820_table[i].addr + e820_table[i].size))
         return count
 
-    def setup_acpi(self, **kwargs):
+    def setup_before_code(self, **kwargs):
         # [0-0xa0000] is reserved for BIOS
         # [0xe0000 - 0x200000] is for ACPI related data
         # load ACPI pages
@@ -206,7 +206,7 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
 
         return kernel_base + (0x200 if self.state.boot_mode == ARCH.X64 else 0)
     
-    def setup_boot(self, kernel_entry: int):
+    def setup_after_code(self, kernel_entry: int):
         addr = self.state.setup_paging()
         self.state.setup_gdt()
         boot_params_addr = self.state.memory.allocate(sizeof(boot_params))

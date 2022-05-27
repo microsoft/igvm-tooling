@@ -36,13 +36,12 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         self._header.init_size = ALIGN(len(self._kernel), PGSIZE)
         self._header.pref_address = self._start
 
-    def setup_acpi(self):
+    def setup_before_code(self):
         # [0-0xa0000] is reserved for BIOS
         # [0xe0000 - 0x200000] is for ACPI related data
         # load ACPI pages
         acpi_tables = self.acpidata
-        sorted_gpa = list(acpi_tables.acpi.keys())
-        sorted_gpa.sort()
+        sorted_gpa = sorted(acpi_tables.acpi.keys())
         # RAM for bios/bootloader
         self.state.seek(0xa0000)
         self.state.memory.allocate(acpi_tables.end_addr - 0xa0000)
@@ -58,7 +57,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         entry_offset = self.elf.elf.header.e_entry - self.elf.elf.get_section_by_name(".text").header.sh_addr
         return self._start + entry_offset
     
-    def setup_boot(self, kernel_entry: int):
+    def setup_after_code(self, kernel_entry: int):
         addr = self.state.setup_paging()
         self.state.setup_gdt()
         boot_params_addr = self.state.memory.allocate(
