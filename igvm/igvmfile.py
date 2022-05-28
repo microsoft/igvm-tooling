@@ -15,11 +15,12 @@ PLAT_TYPE = 0x2
 PLAT_VERSION = 0x1
 PLAT_SHARED_GPA_BOUND = 0
 
-SEV_SNP_ENABLE = (1<<0)
-SEV_RESTRICTED_INT = (1<<3)
-SEV_ALTERNATIVE_INT = (1<<4)
+SEV_SNP_ENABLE = (1 << 0)
+SEV_RESTRICTED_INT = (1 << 3)
+SEV_ALTERNATIVE_INT = (1 << 4)
 
 SEV_FEATURE_DEFAULT = SEV_SNP_ENABLE | SEV_RESTRICTED_INT
+
 
 def ALIGN(addr, alignment):
     return (addr + alignment - 1) & (~(alignment-1))
@@ -166,7 +167,7 @@ SNP_POLICY_BITS = SNP_POLICY_VMPL_ENABLED | (
 #     }
 # }
 class TEIConfig():
-    def __init__(self, file_path = None):
+    def __init__(self, file_path=None):
         if not file_path:  # if no file provided return default values
             self.version = (c_uint32)(1)
             self.guest_svn = (c_uint32)(2)
@@ -256,11 +257,9 @@ class HV_PSP_CPUID_PAGE(Structure):
                 ('CpuidLeafInfo', HV_PSP_CPUID_LEAF * 64)]
 
 
-
 class IGVMHeaders:
     _ZERO_DIGEST = sha384(b'\x00' * PGSIZE).digest()
     _MEASURED_PAGE_TYPES = [SNP_PAGE_TYPE_VMSA, SNP_PAGE_TYPE_NORMAL]
-    
 
     def __init__(self, vtl: int, policy: int):
         self.curr_digest = b'\x00' * 48
@@ -400,8 +399,10 @@ class IGVMHeaders:
             if varheader.Type == IGVM_VHT_VP_CONTEXT:
                 context = IGVM_VHS_VP_CONTEXT.from_buffer_copy(
                     raw, offset + sizeof(varheader))
-                vmsa = struct_vmcb_save_area.from_buffer_copy(raw, context.FileOffset)
-                ans.append(f'IGVM_VHT_VP_CONTEXT({offset:02x})' + dumps(context) + dumps(vmsa))
+                vmsa = struct_vmcb_save_area.from_buffer_copy(
+                    raw, context.FileOffset)
+                ans.append(
+                    f'IGVM_VHT_VP_CONTEXT({offset:02x})' + dumps(context) + dumps(vmsa))
             offset += sizeof(IGVM_VHS_VARIABLE_HEADER) + varheader.Length
             offset = (offset + 7) & ~7
         return "\n".join(ans)
@@ -431,9 +432,11 @@ class IGVMFile(VMState):
         if self._sign_key:
             return self._sign_key
         if self._sign_key_pem:
-            self._sign_key = SigningKey.from_pem(self._sign_key_pem, hashfunc=sha384)
+            self._sign_key = SigningKey.from_pem(
+                self._sign_key_pem, hashfunc=sha384)
         else:
-            self._sign_key = SigningKey.generate(curve=NIST384p, hashfunc=sha384)
+            self._sign_key = SigningKey.generate(
+                curve=NIST384p, hashfunc=sha384)
         return self._sign_key
 
     @cached_property

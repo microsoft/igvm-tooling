@@ -18,14 +18,15 @@ BOOT_SOURCES = ("arch/x86/include/uapi/asm/bootparam.h",
                 "arch/x86/include/asm/segment.h",
                 "include/acpi/acpi.h")
 
-LINUX_SYMBOLS = ("e820_type", "struct_vmcb_save_area", "struct_boot_params", "struct_desc_struct", "struct_acpi_table_rsdp", "struct_acpi_table_header" )
+LINUX_SYMBOLS = ("e820_type", "struct_vmcb_save_area", "struct_boot_params",
+                 "struct_desc_struct", "struct_acpi_table_rsdp", "struct_acpi_table_header")
 
 # igvmfileformat from windows os repo.
-# onecore/vm/common/guestloader/inc/IgvmFileFormat.h + SNP_PAGE related struct 
+# onecore/vm/common/guestloader/inc/IgvmFileFormat.h + SNP_PAGE related struct
 IGVMFMT_SOURCES = ("onecore/vm/common/guestloader/inc/IgvmFileFormat.h",)
 
 
-def _load_struct_from_c(src_dir: str, cpath: Sequence[str], pypath: str, symbols: Sequence= []):
+def _load_struct_from_c(src_dir: str, cpath: Sequence[str], pypath: str, symbols: Sequence = []):
     try:
         from ctypeslib.codegen.codegenerator import translate_files
         from ctypeslib.codegen import config
@@ -61,7 +62,8 @@ def install_linuxboot_struct():
 
 
 def install_igvmfileformat_struct():
-    return _load_struct_from_c(WIN_OS_DIR, IGVMFMT_SOURCES, "igvmfileformat.py", symbols = [])
+    return _load_struct_from_c(WIN_OS_DIR, IGVMFMT_SOURCES, "igvmfileformat.py", symbols=[])
+
 
 try:
     from igvm.structure.linuxboot import *

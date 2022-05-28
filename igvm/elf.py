@@ -6,7 +6,8 @@ class Symbol:
         self.addr = addr
         self.size = size
 
-class ELFObj(object):  
+
+class ELFObj(object):
     def __init__(self, f):
         try:
             import elftools.elf.elffile as elffile

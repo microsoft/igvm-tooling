@@ -14,12 +14,12 @@ class INFORM(Enum):
     bzImage = "bzImage"
     elf = "elf"
 
+
 def str2bool(val):
     return val in ["true", "1", "True"]
 
 
-
-def main(argv = None):
+def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
 
@@ -28,13 +28,14 @@ def main(argv = None):
                                   help='set log level')
     logging_args, _ = logging_argparse.parse_known_args(argv)
 
-    logging.basicConfig(filename='igvm.log', filemode='w', level=logging_args.log_level)
+    logging.basicConfig(filename='igvm.log', filemode='w',
+                        level=logging_args.log_level)
     parser = argparse.ArgumentParser(parents=[logging_argparse])
     parser.add_argument(
         '-d', type=argparse.FileType('rb'),
         metavar='igvmfile.bin', help='igvmfile for inspection')
     parser.add_argument(
-        '-inform', type=INFORM, default = INFORM.bzImage, help='igvm input format', required=False)
+        '-inform', type=INFORM, default=INFORM.bzImage, help='igvm input format', required=False)
     parser.add_argument(
         '-o', type=argparse.FileType('wb'),
         metavar='igvmfile.bin', help='igvmfile to output')
@@ -47,7 +48,7 @@ def main(argv = None):
     parser.add_argument(
         '-rdinit', type=argparse.FileType('rb'),
         metavar='ramdisk')
-    parser.add_argument('-vtl', type=int, metavar='2', default = 2,
+    parser.add_argument('-vtl', type=int, metavar='2', default=2,
                         help='highest vtl')
     parser.add_argument('-config_file', type=str,
                         help='igvm config file', required=False)

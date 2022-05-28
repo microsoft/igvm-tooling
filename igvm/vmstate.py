@@ -9,9 +9,9 @@ PGSIZE = (1 << PGSHIFT)
 _PAGE_ENCRYPTED = (1 << 51)
 _PAGE_PRESENT = (1 << 0)
 _PAGE_RW = (1 << 1)
-_PAGE_USER = (1<< 2)
-_PAGE_PAGE_PSE = (1<< 7)
-_PAGE_RW_U_P = (_PAGE_PRESENT | _PAGE_RW | _PAGE_USER )
+_PAGE_USER = (1 << 2)
+_PAGE_PAGE_PSE = (1 << 7)
+_PAGE_RW_U_P = (_PAGE_PRESENT | _PAGE_RW | _PAGE_USER)
 
 PAT_UC = 0
 PAT_WC = 1
@@ -20,11 +20,15 @@ PAT_WP = 5
 PAT_WB = 6
 PAT_UC_MINUS = 7
 
+
 def pat(index: int, val: int):
     return val << (8*index)
 
-PAT_RESET_VAL = pat(0, PAT_WB) | pat(1, PAT_WT) | pat(2, PAT_UC_MINUS) |  pat(3, PAT_UC) | pat(4, PAT_WB) | pat(5, PAT_WT) | pat(6, PAT_UC_MINUS) |  pat(7, PAT_UC)
+
+PAT_RESET_VAL = pat(0, PAT_WB) | pat(1, PAT_WT) | pat(2, PAT_UC_MINUS) | pat(
+    3, PAT_UC) | pat(4, PAT_WB) | pat(5, PAT_WT) | pat(6, PAT_UC_MINUS) | pat(7, PAT_UC)
 assert(PAT_RESET_VAL == 0x0007040600070406)
+
 
 class ARCH(Enum):
     X86 = 'x86'
@@ -42,26 +46,28 @@ class SegAttr(Structure):
                 ('g', c_uint16, 1),
                 ('rsvd0', c_uint16, 4)]
 
+
 class UnionSegAttr(Union):
      _fields_ = [("reg", SegAttr), ("val", c_uint16)]
 
-class GdtEntry(struct_desc_struct):
-    def __init__(self, base = 0, limit = 0, type = 0, s = 0, dpl = 0, p = 0, l = 0, db = 0, g = 0):
-        self.limit0=limit
-        self.limit1=(limit>>16)&0xF
-        self.base0=base
-        self.base1=(base>>16)&0xFF
-        self.base2=(base>>24)&0xFF
-        self.type= type
 
-        self.s=s
-        self.dpl=dpl
-        self.p=p
+class GdtEntry(struct_desc_struct):
+    def __init__(self, base=0, limit=0, type=0, s=0, dpl=0, p=0, l=0, db=0, g=0):
+        self.limit0 = limit
+        self.limit1 = (limit >> 16) & 0xF
+        self.base0 = base
+        self.base1 = (base >> 16) & 0xFF
+        self.base2 = (base >> 24) & 0xFF
+        self.type = type
+
+        self.s = s
+        self.dpl = dpl
+        self.p = p
 
         self.avl = 0
-        self.l=l
-        self.d=db
-        self.g=g
+        self.l = l
+        self.d = db
+        self.g = g
 
     @property
     def base(self) -> c_uint32:
@@ -76,21 +82,24 @@ class GdtEntry(struct_desc_struct):
         attr = UnionSegAttr()
         attr.reg.type = self.type
         attr.reg.s = self.s
-        attr.reg.dpl= self.dpl
+        attr.reg.dpl = self.dpl
         attr.reg.p = self.p
         attr.reg.avl = self.avl
         attr.reg.l = self.l
         attr.reg.db = self.d
-        attr.reg.g  = self.g
+        attr.reg.g = self.g
         return attr.val
+
 
 class p4d_t(Structure):
     _pack_ = 1
     _fields_ = [('val', c_uint64)]
 
+
 class pgd_t(Structure):
     _pack_ = 1
     _fields_ = [('val', c_uint64)]
+
 
 class RegCr4(Structure):
     _pack_ = 1
@@ -119,10 +128,13 @@ class RegCr4(Structure):
                 ('PKE', c_uint32, 1),
                 ('rsvd3', c_uint32, 9)]
 
+
 assert sizeof(RegCr4) == 4
+
 
 class UnionRegCr4(Union):
     _fields_ = [("reg", RegCr4), ("val", c_uint32)]
+
 
 class RegEflags(Structure):
     _pack_ = 1
@@ -152,7 +164,9 @@ class RegEflags(Structure):
     def __init__(self):
         self.one = 1
 
+
 assert sizeof(RegEflags) == 4
+
 
 class RegCr0(Structure):
     _pack_ = 1
@@ -171,7 +185,9 @@ class RegCr0(Structure):
                 ('CD', c_uint32, 1),
                 ('PG', c_uint32, 1)]
 
+
 assert sizeof(RegCr0) == 4
+
 
 class UnionRegCr0(Union):
     _fields_ = [("reg", RegCr0), ("val", c_uint32)]
@@ -187,29 +203,35 @@ class RegEfer(Structure):
                 ('SVME', c_uint32, 1),
                 ('rsvd2', c_uint32, 19)]
 
+
 assert sizeof(RegEfer) == 4
+
 
 class UnionRegEfer(Union):
     _fields_ = [("reg", RegEfer), ("val", c_uint32)]
 
+
 class TssDesc32(GdtEntry):
     pass
+
 
 class TssDesc64(TssDesc32):
     _pack_ = 1
     _fields_ = [('base32_63', c_uint32),
                 ('rsvd', c_uint32)]
 
-    def __init__(self, base = 0, limit = 0, type = 0, s = 0, dpl = 0, p = 0, l = 0, db = 0, g = 0):
+    def __init__(self, base=0, limit=0, type=0, s=0, dpl=0, p=0, l=0, db=0, g=0):
         self.base32_63 = (base >> 32) & 0xffffffff
-        TssDesc32.__init__(self, base & 0xffffffff, limit, type, s, dpl, p, l, db, g)
+        TssDesc32.__init__(self, base & 0xffffffff, limit,
+                           type, s, dpl, p, l, db, g)
 
     @property
     def base(self):
         return TssDesc32.base(self) | (self.base32_63 << 32)
 
+
 class Memory(bytearray):
-    def allocate(self, size, alignment = 1):
+    def allocate(self, size, alignment=1):
         addr = (len(self) + alignment - 1) // alignment * alignment
         self.extend(b'\x00' * (addr + size - len(self)))
         return addr
@@ -221,6 +243,7 @@ class Memory(bytearray):
     def read(self, addr, size):
         assert addr + size <= len(self)
         return self[addr:addr + size]
+
 
 class VMState(object):
     def __init__(self, boot_mode: ARCH = ARCH.X86):
@@ -255,9 +278,9 @@ class VMState(object):
         cr0.val = self.vmsa.cr0
         cr4 = UnionRegCr4()
         cr4.val = self.vmsa.cr4
-        
+
         assert cr0.reg.PG == 0
-        assert efer.reg.LMA  == 1
+        assert efer.reg.LMA == 1
         # allocate a PML4 and a PDPT
         p4d_addr = self.memory.allocate(PGSIZE, PGSIZE)
         pgd_addr = self.memory.allocate(PGSIZE, PGSIZE)
@@ -283,21 +306,22 @@ class VMState(object):
         self.vmsa.cr0 = cr0.val
         self.vmsa.cr4 = cr4.val
         self.vmsa.efer = efer.val
-        print("%x"%self.vmsa.efer)
+        print("%x" % self.vmsa.efer)
         return addr
-        
 
     def load_seg(self, vmcb_seg: struct_vmcb_seg, selector: int):
         '''
         Load the segment register and update its cache accordingly.
         '''
         assert (selector & 0b100) == 0, 'LDT is not supported yet'
-        assert selector + sizeof(struct_desc_struct) - 1 <= self.vmsa.gdtr.limit
+        assert selector + sizeof(struct_desc_struct) - \
+            1 <= self.vmsa.gdtr.limit
         desc_addr = self.vmsa.gdtr.base + (selector & ~0x7)
         desc = GdtEntry.from_buffer(self.memory, desc_addr)
         vmcb_seg.base = desc.base
         vmcb_seg.selector = selector
-        vmcb_seg.limit = desc.limit if not desc.g else (desc.limit * PGSIZE + PGSIZE - 1)
+        vmcb_seg.limit = desc.limit if not desc.g else (
+            desc.limit * PGSIZE + PGSIZE - 1)
         vmcb_seg.attrib = desc.attribute
 
     def setup_gdt(self):
@@ -318,7 +342,7 @@ class VMState(object):
 
         KERNEL_PRIV = 0
         USER_PRIV = 3
-        NOT_TSS =  1
+        NOT_TSS = 1
         PRESENT = 1
         USE_PAGE = 1
         CODE_TYPE = 0b1011
@@ -326,13 +350,13 @@ class VMState(object):
 
         gdt = [struct_desc_struct(),  # NULL
                GdtEntry(0, 0xfffff, CODE_TYPE, NOT_TSS, KERNEL_PRIV,
-                              PRESENT, long_mode, 1 - long_mode, USE_PAGE),
+                        PRESENT, long_mode, 1 - long_mode, USE_PAGE),
                GdtEntry(0, 0xfffff, CODE_TYPE, NOT_TSS, USER_PRIV,
-                              PRESENT, long_mode, 1 - long_mode, USE_PAGE),
+                        PRESENT, long_mode, 1 - long_mode, USE_PAGE),
                GdtEntry(0, 0xfffff, DATA_TYPE, NOT_TSS, KERNEL_PRIV,
-                              PRESENT, 0, 1, USE_PAGE),
+                        PRESENT, 0, 1, USE_PAGE),
                GdtEntry(0, 0xfffff, DATA_TYPE, NOT_TSS, USER_PRIV,
-                              PRESENT, 0, 1, USE_PAGE), ]
+                        PRESENT, 0, 1, USE_PAGE), ]
         """
         tss_size = 104
         tss_addr = self.memory.allocate(tss_size)
@@ -346,7 +370,8 @@ class VMState(object):
         gdt_size = sum([sizeof(desc) for desc in gdt])
         gdt_addr = self.memory.allocate(gdt_size)
         # initialize the GDT layout accordingly
-        self.memory.write(gdt_addr, b''.join([bytearray(desc) for desc in gdt]))
+        self.memory.write(gdt_addr, b''.join(
+            [bytearray(desc) for desc in gdt]))
         # update gdtr to point to the GDT in memory
         self.vmsa.gdtr.base = gdt_addr
         self.vmsa.gdtr.limit = gdt_size - 1

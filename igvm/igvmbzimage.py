@@ -47,22 +47,24 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
     USED_BSS_NAMES = ("boot_stack",)
     USED_REL_BSS_NAMES = ("pgtable",)
 
-    def __init__(self, **kwargs): 
+    def __init__(self, **kwargs):
         # Parse BzImage header
         IGVMBaseGenerator.__init__(self, **kwargs)
-        self._extra_validated_ram : List = []
+        self._extra_validated_ram: List = []
         self._use_pvalidate_opt: bool = kwargs["pvalidate_opt"]
         self._kernel: bytearray = bytearray(self.infile.read())
         self.cmdline: bytes = bytes(kwargs["append"], 'ascii')
 
         symbol_file = kwargs["symbol_elf"]
-        self._elf: elflib.ELFObj = elflib.ELFObj(symbol_file) if symbol_file else None
-    
+        self._elf: elflib.ELFObj = elflib.ELFObj(
+            symbol_file) if symbol_file else None
+
         acpi_dir = kwargs["acpi_dir"] if "acpi_dir" in kwargs else None
         self.acpidata: ACPI = ACPI(acpi_dir)
-    
+
         rdinit = kwargs["rdinit"] if "rdinit" in kwargs else None
-        self.ramdisk: bytes = bytes(rdinit.read(), 'ascii') if rdinit else bytes(0)
+        self.ramdisk: bytes = bytes(
+            rdinit.read(), 'ascii') if rdinit else bytes(0)
 
     @property
     def _header(self) -> setup_header:
@@ -124,10 +126,10 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
             addr = self._header.pref_address + symbol.addr
             size = symbol.size
             self.state.seek(addr)
-            logging.debug("_setup_mem_for32=%x %x"%(addr, size))
+            logging.debug("_setup_mem_for32=%x %x" % (addr, size))
             self.state.memory.allocate(size)
             self._extra_validated_ram.append((addr, size))
-        
+
     def _setup_e820(self, e820_table):
         e820_table[0].addr = 0
         e820_table[0].size = 0xa0000
@@ -139,11 +141,13 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         e820_table[2].size = self.acpidata.end_addr - 0x100000
         e820_table[2].type = E820_TYPE_ACPI
         e820_table[3].addr = self._header.pref_address
-        e820_table[3].size = self.state.memory.allocate(0) - self._header.pref_address
+        e820_table[3].size = self.state.memory.allocate(
+            0) - self._header.pref_address
         e820_table[3].type = E820_TYPE_RAM
         count = 4
         for i in range(count):
-            logging.debug("%x %x"%(e820_table[i].addr, e820_table[i].addr + e820_table[i].size))
+            logging.debug("%x %x" % (
+                e820_table[i].addr, e820_table[i].addr + e820_table[i].size))
         return count
 
     def _setup_e820_opt(self, e820_table):
@@ -166,7 +170,8 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
             e820_table[count].type = E820_TYPE_RAM
             count += 1
         for i in range(count):
-            logging.debug("%x %x"%(e820_table[i].addr, e820_table[i].addr + e820_table[i].size))
+            logging.debug("%x %x" % (
+                e820_table[i].addr, e820_table[i].addr + e820_table[i].size))
         return count
 
     def setup_before_code(self, **kwargs):
@@ -185,7 +190,7 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
 
         for gpa in sorted_gpa:
             self.state.memory.write(gpa, acpi_tables.acpi[gpa])
-        logging.debug("acpi_tables.end_addr=%x"%(acpi_tables.end_addr))
+        logging.debug("acpi_tables.end_addr=%x" % (acpi_tables.end_addr))
         self.state.seek(acpi_tables.end_addr)
         return sorted_gpa[0]
 
@@ -195,17 +200,18 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         if self._use_pvalidate_opt:
             logging.debug("_use_pvalidate_opt")
             self.state.memory.allocate(self.vmlinux_size)
-            logging.debug("kernel end = %x"%(self.state.memory.allocate(0)))
+            logging.debug("kernel end = %x" % (self.state.memory.allocate(0)))
             self._setup_mem_for32()
         else:
             self.state.memory.allocate(self.kernel_needed_mem)
         self.state.memory.write(kernel_base, self.vmlinux_bin)
-        
-        logging.debug("kernel need = %x"%(kernel_base + self.kernel_needed_mem))
+
+        logging.debug("kernel need = %x" %
+                      (kernel_base + self.kernel_needed_mem))
         self.state.seek(kernel_base + self.kernel_needed_mem)
 
         return kernel_base + (0x200 if self.state.boot_mode == ARCH.X64 else 0)
-    
+
     def setup_after_code(self, kernel_entry: int):
         addr = self.state.setup_paging()
         self.state.setup_gdt()

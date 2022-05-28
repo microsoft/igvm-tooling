@@ -13,7 +13,7 @@ from igvm.vmstate import ARCH
 
 
 class IGVMELFGenerator(IGVMBaseGenerator):
-   
+
     def __init__(self, **kwargs):
         # Parse BzImage header
         IGVMBaseGenerator.__init__(self, **kwargs)
@@ -27,10 +27,10 @@ class IGVMELFGenerator(IGVMBaseGenerator):
 
         in_path = self.infile.name
         bin_path = in_path + ".binary"
-        subprocess.check_output(["objcopy", in_path,"-O", "binary", bin_path])
+        subprocess.check_output(["objcopy", in_path, "-O", "binary", bin_path])
         with open(bin_path, "rb") as f:
             self._kernel: bytes = f.read()
-        
+
         # Create a setup_header for 32-bit
         self._header = struct_setup_header()
         self._header.init_size = ALIGN(len(self._kernel), PGSIZE)
@@ -54,9 +54,10 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         self.state.seek(self._start)
         self.state.memory.allocate(len(self._kernel), PGSIZE)
         self.state.memory.write(self._start, self._kernel)
-        entry_offset = self.elf.elf.header.e_entry - self.elf.elf.get_section_by_name(".text").header.sh_addr
+        entry_offset = self.elf.elf.header.e_entry - \
+            self.elf.elf.get_section_by_name(".text").header.sh_addr
         return self._start + entry_offset
-    
+
     def setup_after_code(self, kernel_entry: int):
         addr = self.state.setup_paging()
         self.state.setup_gdt()

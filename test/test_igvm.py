@@ -1,4 +1,3 @@
-import argparse
 import unittest
 from unittest.mock import MagicMock, patch
 from igvm.vmstate import ARCH
@@ -6,6 +5,8 @@ import tracemalloc
 
 
 TEST_ACPI = "igvm/acpi/acpi-test"
+
+
 class IgvmGenTest(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -13,13 +14,16 @@ class IgvmGenTest(unittest.TestCase):
         self.patcher = patch('ecdsa.SigningKey')
         self.MockedSigningKey = self.patcher.start()
         tracemalloc.start()
+
         class mockObj(bytes):
             def to_bytes(self, x, y):
                 return self
         self.MockedSigningKey.sign = MagicMock(
             return_value=[mockObj(48), mockObj(48)])
-        self.MockedSigningKey.generate = MagicMock(return_value=self.MockedSigningKey)
-        self.MockedSigningKey.from_pem = MagicMock(return_value=self.MockedSigningKey)
+        self.MockedSigningKey.generate = MagicMock(
+            return_value=self.MockedSigningKey)
+        self.MockedSigningKey.from_pem = MagicMock(
+            return_value=self.MockedSigningKey)
         self.MockedSigningKey.verifying_key.pubkey.point.x = MagicMock(
             return_value=mockObj(
                 48))
@@ -39,7 +43,8 @@ class IgvmGenTest(unittest.TestCase):
     def testHash(self):
         from hashlib import sha384
         zero = sha384(b'\x00' * 0x1000).digest()
-        self.assertEqual(zero, b'\xc0\xe5\x9a>?\xfb\xd3\xb5\xc7T(\xfb6C/\xac\xab\xc7E\x94B\x96\xffQ_s|O\xefN\xfcdXh\t\xf7\xa1oV5J\x1e\xae\xcf*\xa8\xd7t')
+        self.assertEqual(
+            zero, b'\xc0\xe5\x9a>?\xfb\xd3\xb5\xc7T(\xfb6C/\xac\xab\xc7E\x94B\x96\xffQ_s|O\xefN\xfcdXh\t\xf7\xa1oV5J\x1e\xae\xcf*\xa8\xd7t')
 
     def testBzImage(self):
         from igvm.igvmbzimage import IGVMLinuxGenerator
@@ -97,7 +102,7 @@ class IgvmGenTest(unittest.TestCase):
             rawbytes = generator.generate()
 
         with open("test/tests/test_bzImage_noopt.dump", "r") as f:
-            expected_dump = f.read()        
+            expected_dump = f.read()
             self.assertEqualDump(bytes(rawbytes), expected_dump)
 
     def testElf(self):

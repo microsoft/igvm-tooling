@@ -7,6 +7,7 @@ from igvm.igvmfile import IGVMFile, PGSIZE
 
 class IGVMBaseGenerator(object):
     SNP_CPUID_PAGE_ADDR = 0x800000
+
     def __init__(self, **kwargs):
         self._vtl: int = kwargs["vtl"]
         self.infile: argparse.FileType = kwargs["kernel"]
@@ -14,10 +15,10 @@ class IGVMBaseGenerator(object):
         # Init IGVMFile state
         config = kwargs["config"] if "config" in kwargs else None
         sign_key = kwargs["sign_key"] if "sign_key" in kwargs else None
-        pem = sign_key.read() if sign_key else None 
+        pem = sign_key.read() if sign_key else None
         boot_mode = kwargs["boot_mode"]
         self.state: IGVMFile = IGVMFile(boot_mode=boot_mode,
-                              config_path=config,  pem = pem)
+                                        config_path=config,  pem=pem)
 
     @abstractclassmethod
     def setup_before_code(self, **kwargs):

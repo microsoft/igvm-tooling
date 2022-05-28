@@ -9,5 +9,6 @@ def alltests():
     ret = unittest.TestLoader().discover('test/')
     return ret
 
+
 if __name__ == '__main__':
     unittest.main(verbosity=0)
