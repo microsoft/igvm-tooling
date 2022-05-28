@@ -1,4 +1,4 @@
-
+import argparse
 import base64
 import cstruct
 import logging
@@ -14,6 +14,7 @@ ACPI_END_ADDR = 0x200000
 DEFAULT_ACPI_FILE = os.path.join(os.path.dirname(__file__), "acpi", "acpi.zip")
 PGSIZE = 4096
 IASL_TOOL = "iasl"
+
 
 class ACPITableHeader(cstruct.CStruct):
     __byte_order__ = cstruct.LITTLE_ENDIAN
@@ -31,6 +32,7 @@ class ACPITableHeader(cstruct.CStruct):
     }
     """
 
+
 class RSDPTable(cstruct.CStruct):
     __byte_order__ = cstruct.LITTLE_ENDIAN
     __def__ = """
@@ -47,6 +49,7 @@ class RSDPTable(cstruct.CStruct):
     };
     """
 
+
 ACPI_XSDT_ENTRY_SIZE = 8
 
 ACPI_TABLE_STRUCTS = {
@@ -59,6 +62,7 @@ ACPI_TABLE_STRUCTS = {
     "RSD ": RSDPTable,
 }
 
+
 def convert2pages(data_map):
     sorted_addr = list(data_map.keys())
     page_map = {}
@@ -69,9 +73,9 @@ def convert2pages(data_map):
     addr = sorted_addr[0]
     page_map[gpa] = bytes(0)
     offset = 0
-    while data_index<len(sorted_addr):
+    while data_index < len(sorted_addr):
         addr = sorted_addr[data_index]
-        gpa =  int((addr+offset)/PGSIZE) * PGSIZE
+        gpa = int((addr+offset)/PGSIZE) * PGSIZE
         if(gpa not in page_map):
             page_map[gpa] = bytes(0)
         remain = PGSIZE - len(page_map[gpa])
@@ -87,25 +91,26 @@ def convert2pages(data_map):
 
 
 class ACPIUpdate:
-   
-    def __init__(self, name: str, addr: int, dslpath: str, amldata: bytes,length: int):
+
+    def __init__(self, name: str, addr: int, dslpath: str, amldata: bytes,
+                 length: int):
         self.updates: Dict[str, str] = {}
         self.appends: List[str] = []
-        self.name: str  = name
+        self.name: str = name
         self.addr: int = addr
         self.dslpath: str = dslpath
         self.length: int = length
         self.amldata: bytes = amldata
 
     def update_dsl(self):
-        if len(self.updates) +  len(self.appends) == 0:
+        if len(self.updates) + len(self.appends) == 0:
             return
-        newdir = os.path.dirname(self.dslpath) +"-new"
+        newdir = os.path.dirname(self.dslpath) + "-new"
         if not os.path.exists(newdir):
             os.mkdir(newdir)
         newdsl = os.path.join(newdir, os.path.basename(self.dslpath))
         newaml = newdsl.replace("dsl", "aml")
-        data =""
+        data = ""
         with open(self.dslpath, "r") as f:
             data = f.read()
         for old in self.updates:
@@ -114,7 +119,9 @@ class ACPIUpdate:
         data += "\n"+"\n".join(self.appends)
         with open(newdsl, "w+") as f:
             f.write(data)
-        subprocess.call([IASL_TOOL, "-f", newdsl], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.call(
+            [IASL_TOOL, "-f", newdsl],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         with open(newaml, "rb") as f:
             self.amldata = f.read()
 
@@ -129,7 +136,7 @@ class ACPI:
     FACP_SUB_TABLES = ['DSDT', 'FACS']
     SUB_TABLES = FACP_SUB_TABLES + XSDT_SUB_TABLES
     VALID_TABLES = TOP_TABLES + SUB_TABLES
-    
+
     def default_acpi(self):
         with open(DEFAULT_ACPI_FILE, "rb") as f:
             data = f.read()
@@ -150,28 +157,31 @@ class ACPI:
             self.acpi = self.default_acpi()
         else:
             self.from_dir(acpi_dir)
-        
+
     def from_dir(self, acpi_dir):
         files = os.listdir(acpi_dir)
         acpi_table = ACPITableHeader()
         rsdp = RSDPTable()
         xsdt = ACPITableHeader()
         tables = {}
-        acpi={}
-        acpi_updates: Dict[ACPIUpdate]= {}
+        acpi = {}
+        acpi_updates: Dict[ACPIUpdate] = {}
         aml_file = ""
         addr = 0
         for file in files:
             if file.endswith(".dsl"):
                 file = os.path.join(acpi_dir, file)
                 aml_file = file.replace("dsl", "aml")
-                subprocess.call([IASL_TOOL, "-f", file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.call([IASL_TOOL, "-f", file],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
             else:
                 continue
             with open(aml_file, "rb") as f:
                 data = f.read()
             acpi_table.unpack(data)
-            name = acpi_table.signature.decode("utf-8","ignore").replace(" ","_")
+            name = acpi_table.signature.decode(
+                "utf-8", "ignore").replace(" ", "_")
             assert (name in self.VALID_TABLES)
             if name.startswith("RSD"):
                 rsdp.unpack(data)
@@ -202,23 +212,26 @@ class ACPI:
                 acpi_updates[name].addr = addr
                 addr += acpi_updates[name].length
                 nentries += 1
-        
+
         # Add FACP_SUB_TABLES
-        if name in self.FACP_SUB_TABLES:
+        for name in self.FACP_SUB_TABLES:
             old = f"{name} Address : 0"
-            new = f"{name} Address : {hex(addr)}"
+            new = f"{name} Address : {hex(acpi_updates[name].addr)}"
+            logging.info("replace %s %s" % (old, new))
             acpi_updates["FACP"].updates[old] = new
+
         tab_idx = 0
         width = 8
         offset = ACPITableHeader.size
-        
         # Add XSDT_SUB_TABLES
         for name in table_names:
             if name not in self.XSDT_SUB_TABLES:
                 continue
             addr = acpi_updates[name].addr
             assert "XSDT" in acpi_updates
-            acpi_updates["XSDT"].appends.append("[%xh %d  %d]\tACPI Table Address %d : %lx"%(offset, offset, width, tab_idx, addr))
+            acpi_updates["XSDT"].appends.append(
+                "[%xh %d  %d]\tACPI Table Address %d : %lx" %
+                (offset, offset, width, tab_idx, addr))
             tab_idx += 1
             offset += width
 
@@ -227,7 +240,7 @@ class ACPI:
             acpi_update = acpi_updates[name]
             acpi_update.update_dsl()
             acpi[acpi_update.addr] = acpi_update.amldata
-            logging.info(name, "%x"%acpi_update.addr)
+            logging.info("table[%s] %x" % (name, acpi_update.addr))
 
         self.acpi = convert2pages(acpi)
         sorted_gpa = list(self.acpi.keys())
@@ -235,7 +248,6 @@ class ACPI:
         self.start_addr = sorted_gpa[0]
         self.end_addr = sorted_gpa[-1] + PGSIZE
 
-import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
