@@ -1,6 +1,6 @@
 import argparse
 import sys
-
+import logging
 from enum import Enum
 
 from igvm.bootcstruct import *
@@ -22,7 +22,14 @@ def str2bool(val):
 def main(argv = None):
     if argv is None:
         argv = sys.argv[1:]
-    parser = argparse.ArgumentParser()
+
+    logging_argparse = argparse.ArgumentParser(add_help=False)
+    logging_argparse.add_argument('-l', '--log-level', default='DEBUG',
+                                  help='set log level')
+    logging_args, _ = logging_argparse.parse_known_args(argv)
+
+    logging.basicConfig(filename='igvm.log', filemode='w', level=logging_args.log_level)
+    parser = argparse.ArgumentParser(parents=[logging_argparse])
     parser.add_argument(
         '-d', type=argparse.FileType('rb'),
         metavar='igvmfile.bin', help='igvmfile for inspection')
@@ -57,7 +64,7 @@ def main(argv = None):
         '-boot_mode', type=ARCH, default="x86", help='Boot mode (x86 or x64)')
     parser.add_argument(
         '-start_addr', type=int, default=0x1a00000, help="start gpa for the image")
-    # sample key can be generated using `openssl ecparam -out ca.key -name secp384r1 -genkey`
+
     args = parser.parse_args(argv)
 
     if args.d:
