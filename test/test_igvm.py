@@ -38,7 +38,7 @@ class IgvmGenTest(unittest.TestCase):
     def assertEqualDump(self, got_binary: str, expected_dump: str):
         from igvm.igvmfile import IGVMFile
         dump = IGVMFile.dump(got_binary)
-        self.assertEqual(dump.split("\n"), expected_dump.split("\n"))
+        self.assertEqual(dump, expected_dump)
 
     def testHash(self):
         from hashlib import sha384
