@@ -6,6 +6,7 @@ from typing import List, Dict, Tuple, Optional
 
 
 from igvm.bootcstruct import *
+from igvm.structure.igvmfileformat import IGVM_VHF_PAGE_DATA_GUEST_INVALID
 from igvm.vmstate import VMState, PGSIZE, ARCH
 
 
@@ -337,6 +338,13 @@ class IGVMHeaders:
                             data_type=IGVM_VHS_PAGE_DATA_TYPE_NORMAL)
         self._update_digest(gpa, page, SNP_PAGE_TYPE_UNMEASURED)
 
+    def add_guest_invalid_normal_page(self, gpa: int, page: bytes):
+        self._add_page_data(gpa=gpa,
+                            file_offset=any(page),
+                            flags=IGVM_VHF_PAGE_DATA_GUEST_INVALID,
+                            data_type=IGVM_VHS_PAGE_DATA_TYPE_NORMAL)
+        #self._update_digest(gpa, page, SNP_PAGE_TYPE_UNMEASURED)
+
     def add_id_block_raw(self, id_block: IGVM_VHS_SNP_ID_BLOCK):
         self._add_variable_header(IGVM_VHT_SNP_ID_BLOCK)
         assert sizeof(self.headers[-1]) == sizeof(id_block)
@@ -416,6 +424,7 @@ class IGVMFile(VMState):
     def __init__(self, boot_mode: ARCH, config_path: Optional[str], pem: Optional[bytes]):
         VMState.__init__(self, boot_mode)
         self.skipped_regions: List[Tuple] = []
+        self._not_validated_regions: List[Tuple] = []
         self._config_path = config_path
         self._sign_key_pem = pem
         self._sign_key = None
@@ -501,6 +510,18 @@ class IGVMFile(VMState):
                 return True
         return False
 
+    def write_not_validated(self, addr: int, content: bytearray):
+        self.memory.write(addr, content)
+        end = addr + len(content)
+        self._not_validated_regions.append((addr, end))
+        print("write_not_validated %x %x" %(addr, end))
+
+    def not_validated(self, addr: int) -> bool:
+        for (start, end) in self._not_validated_regions:
+            if start <= addr < end:
+                return True
+        return False
+
     def gen_vmsa(self) -> struct_vmcb_save_area:
         """Return SVM_VMSA page content"""
         self.vmsa.vmcb_save_area_0.vmcb_save_area_0_0.sev_feature_snp = 1
@@ -560,7 +581,10 @@ class IGVMFile(VMState):
             elif gpa == secret_page:
                 igvm_headers.add_secret_page(gpa, page)
             elif not self.is_skipped(gpa):
-                igvm_headers.add_measured_normal_page(gpa, page)
+                if self.not_validated(gpa):
+                    igvm_headers.add_guest_invalid_normal_page(gpa, page)
+                else:
+                    igvm_headers.add_measured_normal_page(gpa, page)
             else:
                 assert not any(page)
                 continue

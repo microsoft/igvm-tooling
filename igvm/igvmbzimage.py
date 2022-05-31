@@ -241,3 +241,21 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         self.state.vmsa.rip = kernel_entry
         self.state.vmsa.rsi = boot_params_addr
         self.state.vmsa.rsp = boot_stack_addr + PGSIZE
+
+
+class IGVMLinux2Generator(IGVMLinuxGenerator):
+    """Load linux2 payload in guest-invalid memory"""
+
+    def __init__(self, **kwargs):
+        # Parse BzImage header
+        IGVMLinuxGenerator.__init__(self, **kwargs)
+        assert("shared_payload" in kwargs)
+        _infile2 = kwargs["shared_payload"]
+        self._shared_payload: bytearray = bytearray(_infile2.read())
+
+    def setup_after_code(self, kernel_entry: int):
+        IGVMLinuxGenerator.setup_after_code(self, kernel_entry)
+        linux2_start = 0x10000000  # TODO: linux2 param
+        self.state.seek(linux2_start)
+        self.state.memory.allocate(len(self._shared_payload))
+        self.state.write_not_validated(linux2_start, self._shared_payload)
