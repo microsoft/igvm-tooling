@@ -7,6 +7,17 @@ import tracemalloc
 TEST_ACPI = "igvm/acpi/acpi-test"
 
 
+class MockedFileObj:
+    def __init__(self, content: bytearray):
+        self._content: bytearray = content
+
+    def read(self,):
+        return self._content
+    
+    def write(self, content: bytearray):
+        self._content.extend(content)
+
+
 class IgvmGenTest(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
@@ -82,6 +93,27 @@ class IgvmGenTest(unittest.TestCase):
             rawbytes = generator.generate()
 
         with open("test/tests/test_bzImage_x64.dump", "r") as f:
+            expected_dump = f.read()
+            self.assertEqualDump(bytes(rawbytes), expected_dump)
+
+    def testBzImage2(self):
+        from igvm.igvmbzimage import IGVMLinux2Generator
+        with open("test/tests/test_bzImage", "rb") as infile:
+            PARAMS = {
+                "pvalidate_opt": True,
+                "append": "panic=-1 console=ttySEV0",
+                "symbol_elf": "",
+                "vtl": 2,
+                "boot_mode": ARCH.X86,
+                "sign_key": None,
+                "kernel": infile,
+                "shared_payload": MockedFileObj(b'12345678')
+            }
+            generator = IGVMLinux2Generator(**PARAMS)
+            rawbytes = generator.generate()
+        from igvm.igvmfile import IGVMFile
+        dump = IGVMFile.dump(rawbytes)
+        with open("test/tests/test_bzImage2.dump", "r") as f:
             expected_dump = f.read()
             self.assertEqualDump(bytes(rawbytes), expected_dump)
 
