@@ -59,7 +59,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         return self._start + entry_offset
 
     def setup_after_code(self, kernel_entry: int):
-        addr = self.state.setup_paging()
+        addr = self.state.setup_paging(paging_level = 4)
         self.state.setup_gdt()
         boot_params_addr = self.state.memory.allocate(
             sizeof(struct_boot_params))

@@ -90,16 +90,25 @@ class GdtEntry(struct_desc_struct):
         attr.reg.g = self.g
         return attr.val
 
-
-class p4d_t(Structure):
+# 1st level page table
+class PGD(Structure):
     _pack_ = 1
     _fields_ = [('val', c_uint64)]
 
-
-class pgd_t(Structure):
+# 2nd level page table
+class PUD(Structure):
     _pack_ = 1
     _fields_ = [('val', c_uint64)]
 
+# 3rd level page table
+class PMD(Structure):
+    _pack_ = 1
+    _fields_ = [('val', c_uint64)]
+
+# 4th level page table
+class PTE(Structure):
+    _pack_ = 1
+    _fields_ = [('val', c_uint64)]
 
 class RegCr4(Structure):
     _pack_ = 1
@@ -264,7 +273,7 @@ class VMState(object):
             efer.reg.NXE = 1
         self.vmsa.efer = efer.val
 
-    def setup_paging(self):
+    def setup_paging(self, paging_level=2):
         '''
         Setup an identity mapping (VA == PA) with full accesses.
         '''
@@ -281,26 +290,60 @@ class VMState(object):
 
         assert cr0.reg.PG == 0
         assert efer.reg.LMA == 1
-        # allocate a PML4 and a PDPT
-        p4d_addr = self.memory.allocate(PGSIZE, PGSIZE)
-        pgd_addr = self.memory.allocate(PGSIZE, PGSIZE)
-        # make the first PML4 entry point to the PDPT
-        p4d = p4d_t.from_buffer(self.memory, p4d_addr)
-        p4d.val = pgd_addr
-        p4d.val |= _PAGE_RW_U_P
-        p4d.val |= _PAGE_ENCRYPTED
-        # setup identity mapping for [0, 512GB)
-        for i in range(PGSIZE // sizeof(pgd_t)):
-            pgd = pgd_t.from_buffer(self.memory, pgd_addr + i * sizeof(pgd_t))
-            pgd.val = (i << 30)
-            pgd.val |= _PAGE_ENCRYPTED
+        if paging_level == 2:
+            # allocate two pages: one for PGD and one for PUD
+            pgd_addr = self.memory.allocate(PGSIZE, PGSIZE)
+            pud_addr = self.memory.allocate(PGSIZE, PGSIZE)
+            # first entry in PGD points to PUD
+            pgd_entry = PGD.from_buffer(self.memory, pgd_addr)
+            pgd_entry.val = pud_addr
+            pgd_entry.val |= _PAGE_RW_U_P
+            pgd_entry.val |= _PAGE_ENCRYPTED
+            # generate entries until PUD is full
+            # setup identity mapping for [0, 512GB)
+            for i in range(PGSIZE // sizeof(PUD)):
+                pud_entry = PUD.from_buffer(self.memory, pud_addr + i * sizeof(PUD))
+                pud_entry.val = (i << 30)
+                pud_entry.val |= _PAGE_ENCRYPTED
+                pud_entry.val |= _PAGE_RW_U_P
+                pud_entry.val |= _PAGE_PAGE_PSE
+            # each page is 1GB so enable large page support
+            cr4.reg.PSE = 1
+        elif paging_level == 4:
+            # allocate two pages: one for PGD and one for PUD
+            pgd_addr = self.memory.allocate(PGSIZE, PGSIZE)
+            pud_addr = self.memory.allocate(PGSIZE, PGSIZE)
+            pmd_addr = self.memory.allocate(PGSIZE, PGSIZE)
+            pte_addr = self.memory.allocate(512 * PGSIZE, PGSIZE)
+            # first entry in PGD points to PUD
+            pgd = PGD.from_buffer(self.memory, pgd_addr)
+            pgd.val = pud_addr
             pgd.val |= _PAGE_RW_U_P
-            pgd.val |= _PAGE_PAGE_PSE
+            pgd.val |= _PAGE_ENCRYPTED
+            # first entry in PUD points to PMD
+            pud = PUD.from_buffer(self.memory, pud_addr)
+            pud.val = pmd_addr
+            pud.val |= _PAGE_RW_U_P
+            pud.val |= _PAGE_ENCRYPTED
+            # 512 entries in PMD point to 512 PTEs
+            for j in range(512):
+                paddr_base = (j << 21)
+                pmd_entry = PMD.from_buffer(self.memory, pmd_addr + j * sizeof(PMD))
+                current_pte_addr = pte_addr + j * PGSIZE
+                pmd_entry.val = current_pte_addr
+                pmd_entry.val |= _PAGE_RW_U_P
+                pmd_entry.val |= _PAGE_ENCRYPTED
+                # 512 entries in current PTE specify paddr
+                for i in range(PGSIZE // sizeof(PTE)):
+                    pte_entry = PTE.from_buffer(self.memory,\
+                                    current_pte_addr + i * sizeof(PTE))
+                    pte_entry.val = (i << 12) + paddr_base
+                    pte_entry.val |= _PAGE_RW_U_P
+                    pte_entry.val |= _PAGE_ENCRYPTED
+
         cr4.reg.PAE = 1
         # setup cr3
-        self.vmsa.cr3 = p4d_addr | _PAGE_ENCRYPTED
-        # enable large page support
-        cr4.reg.PSE = 1
+        self.vmsa.cr3 = pgd_addr | _PAGE_ENCRYPTED
         # turn on paging
         cr0.reg.PG = 1
         self.vmsa.cr0 = cr0.val
