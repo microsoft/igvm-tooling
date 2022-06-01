@@ -1,10 +1,13 @@
 import argparse
 import sys
 import logging
+
+from distutils.log import INFO
 from enum import Enum
+from frozendict import frozendict
 
 from igvm.bootcstruct import *
-from igvm.igvmbzimage import IGVMLinuxGenerator
+from igvm.igvmbzimage import IGVMLinuxGenerator, IGVMLinux2Generator
 from igvm.igvmelf import IGVMELFGenerator
 from igvm.igvmfile import IGVMFile
 from igvm.vmstate import ARCH
@@ -13,6 +16,12 @@ from igvm.vmstate import ARCH
 class INFORM(Enum):
     bzImage = "bzImage"
     elf = "elf"
+    bzImage2 = "bzImage2"
+
+
+Generators = frozendict({INFORM.bzImage: IGVMLinuxGenerator,
+                         INFORM.bzImage2: IGVMLinux2Generator,
+                         INFORM.elf: IGVMELFGenerator, })
 
 
 def str2bool(val):
@@ -65,16 +74,16 @@ def main(argv=None):
         '-boot_mode', type=ARCH, default="x86", help='Boot mode (x86 or x64)')
     parser.add_argument(
         '-start_addr', type=int, default=0x1a00000, help="start gpa for the image")
+    parser.add_argument(
+        '-shared_payload', type=argparse.FileType('rb'), help="content to be populated to guest-invalid memory(shared between hypervisor and guest), skipping expensive PSP commands")
 
     args = parser.parse_args(argv)
 
     if args.d:
         print(IGVMFile.dump(bytearray(args.d.read())))
     elif args.o:
-        if args.inform == INFORM.bzImage:
-            generator = IGVMLinuxGenerator(**vars(args))
-        if args.inform == INFORM.elf:
-            generator = IGVMELFGenerator(**vars(args))
+        assert args.inform in Generators
+        generator = Generators[args.inform](**vars(args))
         rawbytes = generator.generate()
         args.o.write(rawbytes)
     else:
