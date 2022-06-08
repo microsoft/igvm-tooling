@@ -19,5 +19,7 @@ setup(
         "ctypeslib2",
         "pyelftools",
         "pytest",
+        "cached_property",
+        "frozendict",
     ]
 )
