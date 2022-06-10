@@ -1,3 +1,5 @@
+import argparse
+import logging
 import subprocess
 
 from ctypes import sizeof
@@ -12,6 +14,7 @@ from igvm.igvmfile import PGSIZE, ALIGN
 from igvm.vmstate import ARCH
 boot_params = struct_boot_params
 setup_header = struct_setup_header
+
 
 class IGVMELFGenerator(IGVMBaseGenerator):
 
@@ -32,18 +35,17 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         with open(bin_path, "rb") as f:
             self._kernel: bytes = f.read()
 
-        self._vmpl2_kernel_file: argparse.FileType = kwargs["vmpl2_kernel"]
-        self._vmpl2_kernel: bytearray = bytearray(self._vmpl2_kernel_file.read())
+        vmpl2_file: argparse.FileType = kwargs["vmpl2_kernel"] if "vmpl2_kernel" in kwargs else None
+        self.pgtable_level: int = kwargs["pgtable_level"] if "pgtable_level" in kwargs else 2
+        self._vmpl2_kernel: bytearray = bytearray(
+            vmpl2_file.read()) if vmpl2_file else bytearray()
         # Create a setup_header for 32-bit
-        print(self._vmpl2_header.setup_sects)
-        self._header = struct_setup_header()
-        self._header.init_size = ALIGN(len(self._kernel), PGSIZE)
-        self._header.pref_address = self._start
 
     @property
     def _vmpl2_header(self) -> setup_header:
+        if not self._vmpl2_kernel:
+            return None
         header = setup_header.from_buffer(self._vmpl2_kernel, 0x1f1)
-        print(header.setup_sects)
         assert header.header.to_bytes(
             4, 'little') == b'HdrS', 'invalid setup_header'
         assert header.pref_address > 3 * 1024 * 1024, 'loading base cannot be below 3MB'
@@ -74,30 +76,50 @@ class IGVMELFGenerator(IGVMBaseGenerator):
             self.elf.elf.get_section_by_name(".text").header.sh_addr
         return self._start + entry_offset
 
-    def load_vmpl2_kernel(self):
-        self.state.seek(0x2d00000)
+    def load_vmpl2_kernel(self, vmpl2_addr: int):
+        self.state.seek(vmpl2_addr)
         self.state.memory.allocate(len(self._vmpl2_kernel), PGSIZE)
-        self.state.memory.write(0x2d00000, self._vmpl2_kernel)
+        self.state.memory.write(vmpl2_addr, self._vmpl2_kernel)
+        self.extra_validated_ram.append((vmpl2_addr, len(self._vmpl2_kernel)))
 
     def setup_after_code(self, kernel_entry: int):
-        addr = self.state.setup_paging(paging_level = 4)
+        addr = self.state.setup_paging(paging_level = self.pgtable_level)
         self.state.setup_gdt()
-        self.state.setup_idt()
+        monitor_params_addr = self.state.memory.allocate(
+            sizeof(struct_monitor_params))
         boot_params_addr = self.state.memory.allocate(
             sizeof(struct_boot_params))
-        boot_stack_addr = self.state.memory.allocate(2 * PGSIZE)
+        boot_stack_addr = self.state.memory.allocate(PGSIZE)
         end = self.state.memory.allocate(0)
         self.extra_validated_ram.append((addr, end-addr))
+        vmpl2_kernel_addr = 0x2d00000
+
+        self.state.vmsa.rip = kernel_entry
+        self.state.vmsa.rsi = monitor_params_addr
+        self.state.vmsa.rsp = boot_stack_addr + PGSIZE
+
+        # Load VMPL2 kernel
+        self.load_vmpl2_kernel(vmpl2_kernel_addr)
+
+        # Define VMPL2 kernel's boot parameter
         params = struct_boot_params.from_buffer(
             self.state.memory, boot_params_addr)
-        params.hdr = self._header
+        if self._vmpl2_header:
+            params.hdr = self._vmpl2_header
         params.acpi_rsdp_addr = ACPI_RSDP_ADDR
         params.e820_entries = self._setup_e820_opt(params.e820_table)
         del params  # kill reference to re-allow allocation
-        self.state.vmsa.rip = kernel_entry
-        self.state.vmsa.rsi = boot_params_addr
-        self.state.vmsa.rsp = boot_stack_addr + PGSIZE
-        self.load_vmpl2_kernel()
+
+        # Define VMPL0 monitor's boot parameter
+        monitor_params = struct_monitor_params.from_buffer(
+            self.state.memory, monitor_params_addr)
+        monitor_params.cpuid_page = self.cpuid_page
+        monitor_params.secret_page = self.secrets_page
+        monitor_params.hv_param_page = self.param_page
+        monitor_params.vmpl2_start = vmpl2_kernel_addr
+        monitor_params.vmpl2_kernel_size = len(self._vmpl2_kernel)
+        monitor_params.vmpl2_boot_param = boot_params_addr
+        del monitor_params
 
     def _setup_e820_opt(self, e820_table):
         e820_table[0].addr = 0
@@ -121,11 +143,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
             e820_table[count].size = size
             e820_table[count].type = E820_TYPE_RAM
             count += 1
-        e820_table[count].addr = 0x2d00000
-        e820_table[count].size = len(self._vmpl2_kernel)
-        e820_table[count].type = E820_TYPE_RESERVED
-        count += 1
         for i in range(count):
-            print("%x %x"%(e820_table[i].addr, e820_table[i].addr + e820_table[i].size))
+            logging.debug("%x %x"%(e820_table[i].addr, e820_table[i].addr + e820_table[i].size))
 
         return count

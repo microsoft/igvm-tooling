@@ -52,6 +52,12 @@ def main(argv=None):
         '-kernel', type=argparse.FileType('rb'),
         help='Input image. bzImage or ELF depends on inform')
     parser.add_argument(
+        '-vmpl2_kernel', type=argparse.FileType('rb'),
+        help='Input image. bzImage or ELF depends on inform')
+    parser.add_argument(
+        '-pgtable_level', type=int,
+        help='2-level or 4-level paging')
+    parser.add_argument(
         '-symbol_elf', type=argparse.FileType('rb'), help='arch/x86/boot/compressed/vmlinux')
     parser.add_argument('-append', type=str, metavar='cmdline')
     parser.add_argument(

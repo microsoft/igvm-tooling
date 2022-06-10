@@ -19,6 +19,9 @@ class IGVMBaseGenerator(object):
         boot_mode = kwargs["boot_mode"]
         self.state: IGVMFile = IGVMFile(boot_mode=boot_mode,
                                         config_path=config,  pem=pem)
+        self.cpuid_page: int = 0
+        self.secrets_page: int = 0
+        self.param_page: int = 0
 
     @abstractclassmethod
     def setup_before_code(self, **kwargs):
@@ -41,9 +44,9 @@ class IGVMBaseGenerator(object):
 
         # for CPUID/secrets/param pages
         self.state.seek(self.SNP_CPUID_PAGE_ADDR)
-        cpuid_page = self.state.memory.allocate(PGSIZE)
-        secrets_page = self.state.memory.allocate(PGSIZE)
-        param_page = self.state.memory.allocate(PGSIZE)
+        self.cpuid_page = self.state.memory.allocate(PGSIZE)
+        self.secrets_page = self.state.memory.allocate(PGSIZE)
+        self.param_page = self.state.memory.allocate(PGSIZE)
         # VMSA page at 0x803000
         vmsa_page = self.state.memory.allocate(PGSIZE)  # VMSA page
         # Load vmlinux image
@@ -52,4 +55,4 @@ class IGVMBaseGenerator(object):
         # Allocate gdt, boot_params, cmdline and ramdisk pages
         self.setup_after_code(kernel_entry)
         return self.state.raw(
-            vmsa_page, cpuid_page, secrets_page, param_page, self._vtl)
+            vmsa_page, self.cpuid_page, self.secrets_page, self.param_page, self._vtl)

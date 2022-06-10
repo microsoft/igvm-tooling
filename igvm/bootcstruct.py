@@ -8,6 +8,7 @@ from typing import Sequence
 DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 OUT_DIR = os.path.join(DIR_PATH, "structure")
 LINUX_DIR = os.path.join(DIR_PATH, "../snplinux")
+MONITOR_DIR = os.path.join(DIR_PATH, "../../snp-sm")
 WIN_OS_DIR = os.path.join(DIR_PATH, "../os/src")
 WIN_SDK_DIR = "/mnt/c/"
 INCLUDE_DIRS = ("arch/x86/include", "include", "")
@@ -20,6 +21,8 @@ BOOT_SOURCES = ("arch/x86/include/uapi/asm/bootparam.h",
 
 LINUX_SYMBOLS = ("e820_type", "struct_vmcb_save_area", "struct_boot_params",
                  "struct_desc_struct", "struct_acpi_table_rsdp", "struct_acpi_table_header")
+
+MONITOR_SOURCES = ("monitor/include/monitor.h",)
 
 # igvmfileformat from windows os repo.
 # onecore/vm/common/guestloader/inc/IgvmFileFormat.h + SNP_PAGE related struct
@@ -60,6 +63,9 @@ def _load_struct_from_c(src_dir: str, cpath: Sequence[str], pypath: str, symbols
 def install_linuxboot_struct():
     return _load_struct_from_c(LINUX_DIR, BOOT_SOURCES, "linuxboot.py", LINUX_SYMBOLS)
 
+def install_monitor_struct():
+    return _load_struct_from_c(MONITOR_DIR, MONITOR_SOURCES, "monitor.py", symbols=[])
+
 
 def install_igvmfileformat_struct():
     return _load_struct_from_c(WIN_OS_DIR, IGVMFMT_SOURCES, "igvmfileformat.py", symbols=[])
@@ -78,5 +84,13 @@ try:
 except ImportError:
     if install_igvmfileformat_struct():
         from igvm.structure.igvmfileformat import *
+    else:
+        raise ImportError("Cannot find cstructs for bootparam")
+
+try:
+    from igvm.structure.monitor import *
+except ImportError:
+    if install_monitor_struct():
+        from igvm.structure.monitor import *
     else:
         raise ImportError("Cannot find cstructs for bootparam")
