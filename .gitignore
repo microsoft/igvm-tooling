@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+igvm/acpi/acpi-test/*.aml
+igvm/acpi/acpi-test-aml
+igvm/acpi/acpi-test-new
+.vscode
