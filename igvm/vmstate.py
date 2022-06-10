@@ -253,6 +253,60 @@ class Memory(bytearray):
         assert addr + size <= len(self)
         return self[addr:addr + size]
 
+def allocate_l2pgtable(memory: Memory) -> int:
+    pgd_addr = memory.allocate(PGSIZE, PGSIZE)
+    pud_addr = memory.allocate(PGSIZE, PGSIZE)
+    # first entry in PGD points to PUD
+    pgd_entry = PGD.from_buffer(memory, pgd_addr)
+    pgd_entry.val = pud_addr
+    pgd_entry.val |= _PAGE_RW_U_P
+    pgd_entry.val |= _PAGE_ENCRYPTED
+    # generate entries until PUD is full
+    # setup identity mapping for [0, 512GB)
+    for i in range(PGSIZE // sizeof(PUD)):
+        pud_entry = PUD.from_buffer(memory, pud_addr + i * sizeof(PUD))
+        pud_entry.val = (i << 30)
+        pud_entry.val |= _PAGE_ENCRYPTED
+        pud_entry.val |= _PAGE_RW_U_P
+        pud_entry.val |= _PAGE_PAGE_PSE
+    return pgd_addr
+
+
+def allocate_l4pgtable(memory: Memory) -> int:
+     # allocate two pages: one for PGD and one for PUD
+    pgd_addr = memory.allocate(PGSIZE, PGSIZE)
+    pud_addr = memory.allocate(PGSIZE, PGSIZE)
+    pmd_addr = memory.allocate(4 * PGSIZE, PGSIZE)
+    pte_addr = memory.allocate(512 * 4 * PGSIZE, PGSIZE)
+    # first entry in PGD points to PUD
+    pgd = PGD.from_buffer(memory, pgd_addr)
+    pgd.val = pud_addr
+    pgd.val |= _PAGE_RW_U_P
+    pgd.val |= _PAGE_ENCRYPTED
+    # 4 entries in PUD points to 4 PMDs
+    for k in range(4):
+        pud_entry = PUD.from_buffer(memory, pud_addr + k * sizeof(PUD))
+        current_pud_base = (k << 30)
+        current_pmd_addr = pmd_addr + k * PGSIZE
+        pud_entry.val = current_pmd_addr
+        pud_entry.val |= _PAGE_RW_U_P
+        pud_entry.val |= _PAGE_ENCRYPTED
+        # 512 entries in PMD point to 512 PTEs
+        for j in range(512):
+            paddr_base = (j << 21) + current_pud_base
+            pmd_entry = PMD.from_buffer(memory, current_pmd_addr + j * sizeof(PMD))
+            current_pte_addr = pte_addr + (k * 512 + j) * PGSIZE
+            pmd_entry.val = current_pte_addr
+            pmd_entry.val |= _PAGE_RW_U_P
+            pmd_entry.val |= _PAGE_ENCRYPTED
+            # 512 entries in current PTE specify paddr
+            for i in range(PGSIZE // sizeof(PTE)):
+                pte_entry = PTE.from_buffer(memory,\
+                                current_pte_addr + i * sizeof(PTE))
+                pte_entry.val = (i << 12) + paddr_base
+                pte_entry.val |= _PAGE_RW_U_P
+                pte_entry.val |= _PAGE_ENCRYPTED
+    return pgd_addr
 
 class VMState(object):
     def __init__(self, boot_mode: ARCH = ARCH.X86):
@@ -280,7 +334,6 @@ class VMState(object):
         addr = self.memory.allocate(0)
         if self.boot_mode != ARCH.X64:
             return addr
-        print("paging")
         efer = UnionRegEfer()
         efer.val = self.vmsa.efer
         cr0 = UnionRegCr0()
@@ -290,57 +343,16 @@ class VMState(object):
 
         assert cr0.reg.PG == 0
         assert efer.reg.LMA == 1
+        pgd_addr = 0
         if paging_level == 2:
             # allocate two pages: one for PGD and one for PUD
-            pgd_addr = self.memory.allocate(PGSIZE, PGSIZE)
-            pud_addr = self.memory.allocate(PGSIZE, PGSIZE)
-            # first entry in PGD points to PUD
-            pgd_entry = PGD.from_buffer(self.memory, pgd_addr)
-            pgd_entry.val = pud_addr
-            pgd_entry.val |= _PAGE_RW_U_P
-            pgd_entry.val |= _PAGE_ENCRYPTED
-            # generate entries until PUD is full
-            # setup identity mapping for [0, 512GB)
-            for i in range(PGSIZE // sizeof(PUD)):
-                pud_entry = PUD.from_buffer(self.memory, pud_addr + i * sizeof(PUD))
-                pud_entry.val = (i << 30)
-                pud_entry.val |= _PAGE_ENCRYPTED
-                pud_entry.val |= _PAGE_RW_U_P
-                pud_entry.val |= _PAGE_PAGE_PSE
+            pgd_addr = allocate_l2pgtable(self.memory)
             # each page is 1GB so enable large page support
             cr4.reg.PSE = 1
         elif paging_level == 4:
-            # allocate two pages: one for PGD and one for PUD
-            pgd_addr = self.memory.allocate(PGSIZE, PGSIZE)
-            pud_addr = self.memory.allocate(PGSIZE, PGSIZE)
-            pmd_addr = self.memory.allocate(PGSIZE, PGSIZE)
-            pte_addr = self.memory.allocate(512 * PGSIZE, PGSIZE)
-            # first entry in PGD points to PUD
-            pgd = PGD.from_buffer(self.memory, pgd_addr)
-            pgd.val = pud_addr
-            pgd.val |= _PAGE_RW_U_P
-            pgd.val |= _PAGE_ENCRYPTED
-            # first entry in PUD points to PMD
-            pud = PUD.from_buffer(self.memory, pud_addr)
-            pud.val = pmd_addr
-            pud.val |= _PAGE_RW_U_P
-            pud.val |= _PAGE_ENCRYPTED
-            # 512 entries in PMD point to 512 PTEs
-            for j in range(512):
-                paddr_base = (j << 21)
-                pmd_entry = PMD.from_buffer(self.memory, pmd_addr + j * sizeof(PMD))
-                current_pte_addr = pte_addr + j * PGSIZE
-                pmd_entry.val = current_pte_addr
-                pmd_entry.val |= _PAGE_RW_U_P
-                pmd_entry.val |= _PAGE_ENCRYPTED
-                # 512 entries in current PTE specify paddr
-                for i in range(PGSIZE // sizeof(PTE)):
-                    pte_entry = PTE.from_buffer(self.memory,\
-                                    current_pte_addr + i * sizeof(PTE))
-                    pte_entry.val = (i << 12) + paddr_base
-                    pte_entry.val |= _PAGE_RW_U_P
-                    pte_entry.val |= _PAGE_ENCRYPTED
-
+            pgd_addr = allocate_l4pgtable(self.memory)
+        else:
+            raise Exception("Invalid paging_level = %d"%(paging_level))
         cr4.reg.PAE = 1
         # setup cr3
         self.vmsa.cr3 = pgd_addr | _PAGE_ENCRYPTED
@@ -349,7 +361,6 @@ class VMState(object):
         self.vmsa.cr0 = cr0.val
         self.vmsa.cr4 = cr4.val
         self.vmsa.efer = efer.val
-        print("%x" % self.vmsa.efer)
         return addr
 
     def load_seg(self, vmcb_seg: struct_vmcb_seg, selector: int):
