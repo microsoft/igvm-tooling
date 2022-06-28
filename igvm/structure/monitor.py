@@ -128,7 +128,6 @@ struct_monitor_params._fields_ = [
     ('cpuid_page', ctypes.c_uint64),
     ('secret_page', ctypes.c_uint64),
     ('hv_param_page', ctypes.c_uint64),
-    ('monitor_npages', ctypes.c_uint64),
     ('vmpl2_boot_param', ctypes.c_uint64),
     ('vmpl2_start', ctypes.c_uint64),
     ('vmpl2_kernel_size', ctypes.c_uint64),
