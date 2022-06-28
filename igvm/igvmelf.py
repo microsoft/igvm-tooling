@@ -18,6 +18,7 @@ setup_header = struct_setup_header
 
 class IGVMELFGenerator(IGVMBaseGenerator):
 
+    BOOT_STACK_SIZE = 0x1000
     def __init__(self, **kwargs):
         # Parse BzImage header
         IGVMBaseGenerator.__init__(self, **kwargs)
@@ -69,11 +70,19 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         return sorted_gpa[0]
 
     def load_code(self):
+        # Setup pgtable and boot stack after vmsa page but before code.
+        boot_stack_addr = self.state.memory.allocate(self.BOOT_STACK_SIZE, 16)
+        self.state.vmsa.rsp = boot_stack_addr + self.BOOT_STACK_SIZE
+        self.state.setup_paging(paging_level = self.pgtable_level)
+        addr = self.state.memory.allocate(0)
+        self.extra_validated_ram.append((boot_stack_addr, addr - boot_stack_addr))
+        # setup code
         self.state.seek(self._start)
         self.state.memory.allocate(len(self._kernel), PGSIZE)
         self.state.memory.write(self._start, self._kernel)
         entry_offset = self.elf.elf.header.e_entry - \
             self.elf.elf.get_section_by_name(".text").header.sh_addr
+        self.extra_validated_ram.append((self._start, len(self._kernel)))
         return self._start + entry_offset
 
     def load_vmpl2_kernel(self, vmpl2_addr: int):
@@ -83,21 +92,26 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         self.extra_validated_ram.append((vmpl2_addr, len(self._vmpl2_kernel)))
 
     def setup_after_code(self, kernel_entry: int):
-        addr = self.state.setup_paging(paging_level = self.pgtable_level)
+        # Skip all sections
+        text_start = self.elf.elf.get_section_by_name(".text").header.sh_addr
+        max_addr = 0
+        for s in self.elf.elf.iter_sections():
+            max_addr = max(max_addr, s.header.sh_addr,s.header.sh_addr + s.header.sh_size)
+        monitor_end = ALIGN(max_addr - text_start + self._start, PGSIZE)
+        self.state.seek(monitor_end)
+
+        # Setup other input data to security monitor
+        addr = self.state.memory.allocate(0)
         self.state.setup_gdt()
         monitor_params_addr = self.state.memory.allocate(
             sizeof(struct_monitor_params))
         boot_params_addr = self.state.memory.allocate(
             sizeof(struct_boot_params))
-        boot_stack_addr = self.state.memory.allocate(PGSIZE)
         end = self.state.memory.allocate(0)
         self.extra_validated_ram.append((addr, end-addr))
         vmpl2_kernel_addr = 0x2d00000
-
         self.state.vmsa.rip = kernel_entry
         self.state.vmsa.rsi = monitor_params_addr
-        self.state.vmsa.rsp = boot_stack_addr + PGSIZE
-
         # Load VMPL2 kernel
         self.load_vmpl2_kernel(vmpl2_kernel_addr)
 
@@ -134,10 +148,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         e820_table[3].addr = self.SNP_CPUID_PAGE_ADDR
         e820_table[3].size = 4 * PGSIZE
         e820_table[3].type = E820_TYPE_RESERVED
-        e820_table[4].addr = self._start
-        e820_table[4].size = len(self._kernel)
-        e820_table[4].type = E820_TYPE_RAM
-        count = 5
+        count = 4
         for addr, size in self.extra_validated_ram:
             e820_table[count].addr = addr
             e820_table[count].size = size
