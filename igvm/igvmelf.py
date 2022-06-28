@@ -94,10 +94,11 @@ class IGVMELFGenerator(IGVMBaseGenerator):
     def setup_after_code(self, kernel_entry: int):
         # Skip all sections
         text_start = self.elf.elf.get_section_by_name(".text").header.sh_addr
+        monitor_end = ALIGN(self.state.memory.allocate(0), PGSIZE)
         max_addr = 0
         for s in self.elf.elf.iter_sections():
             max_addr = max(max_addr, s.header.sh_addr,s.header.sh_addr + s.header.sh_size)
-        monitor_end = ALIGN(max_addr - text_start + self._start, PGSIZE)
+        monitor_end = max(monitor_end, ALIGN(max_addr - text_start + self._start, PGSIZE))
         self.state.seek(monitor_end)
 
         # Setup other input data to security monitor
