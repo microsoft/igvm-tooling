@@ -29,6 +29,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         self.acpidata: ACPI = ACPI(acpi_dir)
 
         self.elf = elflib.ELFObj(self.infile)
+        self.cmdline = kargs["append"] if "append" in kwargs else None
 
         in_path = self.infile.name
         bin_path = in_path + ".binary"
@@ -73,7 +74,12 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         # Setup pgtable and boot stack after vmsa page but before code.
         boot_stack_addr = self.state.memory.allocate(self.BOOT_STACK_SIZE, 16)
         self.state.vmsa.rsp = boot_stack_addr + self.BOOT_STACK_SIZE
+
+        self.cmdline_addr = self.state.memory.allocate(len(self.cmdline))
+        self.state.memory.write(cmdline_addr, self.cmdline)
+
         self.state.setup_paging(paging_level = self.pgtable_level)
+
         addr = self.state.memory.allocate(0)
         self.extra_validated_ram.append((boot_stack_addr, addr - boot_stack_addr))
         # setup code
@@ -121,6 +127,8 @@ class IGVMELFGenerator(IGVMBaseGenerator):
             self.state.memory, boot_params_addr)
         if self._vmpl2_header:
             params.hdr = self._vmpl2_header
+        params.hdr.cmd_line_ptr = self.cmdline_addr
+        params.hdr.cmdline_size = len(self.cmdline)
         params.acpi_rsdp_addr = ACPI_RSDP_ADDR
         params.e820_entries = self._setup_e820_opt(params.e820_table)
         del params  # kill reference to re-allow allocation
