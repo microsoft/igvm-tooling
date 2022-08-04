@@ -83,6 +83,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         addr = self.state.memory.allocate(0)
         self.extra_validated_ram.append((boot_stack_addr, addr - boot_stack_addr))
         # setup code
+        self._start = ALIGN(addr, PGSIZE)
         self.state.seek(self._start)
         self.state.memory.allocate(len(self._kernel), PGSIZE)
         self.state.memory.write(self._start, self._kernel)

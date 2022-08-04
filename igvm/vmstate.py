@@ -274,17 +274,18 @@ def allocate_l2pgtable(memory: Memory) -> int:
 
 def allocate_l4pgtable(memory: Memory) -> int:
      # allocate two pages: one for PGD and one for PUD
+    num_gb = 16
     pgd_addr = memory.allocate(PGSIZE, PGSIZE)
     pud_addr = memory.allocate(PGSIZE, PGSIZE)
-    pmd_addr = memory.allocate(4 * PGSIZE, PGSIZE)
-    pte_addr = memory.allocate(512 * 4 * PGSIZE, PGSIZE)
+    pmd_addr = memory.allocate(num_gb * PGSIZE, PGSIZE)
+    pte_addr = memory.allocate(512 * num_gb * PGSIZE, PGSIZE)
     # first entry in PGD points to PUD
     pgd = PGD.from_buffer(memory, pgd_addr)
     pgd.val = pud_addr
     pgd.val |= _PAGE_RW_U_P
     pgd.val |= _PAGE_ENCRYPTED
     # 4 entries in PUD points to 4 PMDs
-    for k in range(4):
+    for k in range(num_gb):
         pud_entry = PUD.from_buffer(memory, pud_addr + k * sizeof(PUD))
         current_pud_base = (k << 30)
         current_pmd_addr = pmd_addr + k * PGSIZE
