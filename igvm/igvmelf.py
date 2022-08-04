@@ -29,7 +29,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         self.acpidata: ACPI = ACPI(acpi_dir)
 
         self.elf = elflib.ELFObj(self.infile)
-        self.cmdline = kargs["append"] if "append" in kwargs else None
+        self.cmdline = bytes(kwargs["append"] if "append" in kwargs else None, 'ascii')
 
         in_path = self.infile.name
         bin_path = in_path + ".binary"
@@ -76,7 +76,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         self.state.vmsa.rsp = boot_stack_addr + self.BOOT_STACK_SIZE
 
         self.cmdline_addr = self.state.memory.allocate(len(self.cmdline))
-        self.state.memory.write(cmdline_addr, self.cmdline)
+        self.state.memory.write(self.cmdline_addr, self.cmdline)
 
         self.state.setup_paging(paging_level = self.pgtable_level)
 
@@ -103,7 +103,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         monitor_end = ALIGN(self.state.memory.allocate(0), PGSIZE)
         max_addr = 0
         for s in self.elf.elf.iter_sections():
-            max_addr = max(max_addr, s.header.sh_addr,s.header.sh_addr + s.header.sh_size)
+            max_addr = max(max_addr, s.header.sh_addr + s.header.sh_size)
         monitor_end = max(monitor_end, ALIGN(max_addr - text_start + self._start, PGSIZE))
         self.state.seek(monitor_end)
 
