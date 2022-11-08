@@ -29,7 +29,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         self.acpidata: ACPI = ACPI(acpi_dir)
 
         self.elf = elflib.ELFObj(self.infile)
-        self.cmdline = bytes(kwargs["append"] if "append" in kwargs else None, 'ascii')
+        self.cmdline = bytes(kwargs["append"] if "append" in kwargs else None, 'ascii') + bytes([0])
 
         in_path = self.infile.name
         bin_path = in_path + ".binary"
