@@ -309,6 +309,46 @@ def allocate_l4pgtable(memory: Memory) -> int:
                 pte_entry.val |= _PAGE_ENCRYPTED
     return pgd_addr
 
+def allocate_mixpgtable(memory: Memory, monitor_start, monitor_end) -> int:
+    # 4-k page for sm; 2M page for others;
+    # allocate two pages: one for PGD and one for PUD
+    assert(monitor_start % 0x200000 == 0);
+    assert(monitor_end % 0x200000 == 0);
+    num_gb = 16
+    pgd_addr = memory.allocate(PGSIZE, PGSIZE)
+    pud_addr = memory.allocate(PGSIZE, PGSIZE)
+    pmd_addr = memory.allocate(num_gb * PGSIZE, PGSIZE)
+    pte_addr = memory.allocate(512 * num_gb * PGSIZE, PGSIZE)
+    # first entry in PGD points to PUD
+    pgd = PGD.from_buffer(memory, pgd_addr)
+    pgd.val = pud_addr
+    pgd.val |= _PAGE_RW_U_P
+    pgd.val |= _PAGE_ENCRYPTED
+    # 4 entries in PUD points to 4 PMDs
+    for k in range(num_gb):
+        pud_entry = PUD.from_buffer(memory, pud_addr + k * sizeof(PUD))
+        current_pud_base = (k << 30)
+        current_pmd_addr = pmd_addr + k * PGSIZE
+        pud_entry.val = current_pmd_addr
+        pud_entry.val |= _PAGE_RW_U_P
+        pud_entry.val |= _PAGE_ENCRYPTED
+        # 512 entries in PMD point to 512 PTEs
+        for j in range(512):
+            paddr_base = (j << 21) + current_pud_base
+            pmd_entry = PMD.from_buffer(memory, current_pmd_addr + j * sizeof(PMD))
+            current_pte_addr = pte_addr + (k * 512 + j) * PGSIZE
+            pmd_entry.val = current_pte_addr
+            pmd_entry.val |= _PAGE_RW_U_P
+            pmd_entry.val |= _PAGE_ENCRYPTED
+            # 512 entries in current PTE specify paddr
+            for i in range(PGSIZE // sizeof(PTE)):
+                pte_entry = PTE.from_buffer(memory,\
+                                current_pte_addr + i * sizeof(PTE))
+                pte_entry.val = (i << 12) + paddr_base
+                pte_entry.val |= _PAGE_RW_U_P
+                pte_entry.val |= _PAGE_ENCRYPTED
+    return pgd_addr
+
 class VMState(object):
     def __init__(self, boot_mode: ARCH = ARCH.X86):
         self.memory = Memory()

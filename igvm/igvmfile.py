@@ -304,7 +304,9 @@ class IGVMHeaders:
 
     def add_param_page(self, gpa: int, page: bytes):
         self._add_variable_header(IGVM_VHT_PARAMETER_AREA, PGSIZE, 0, 0)
+        # offset = 0
         self._add_variable_header(IGVM_VHT_VP_COUNT_PARAMETER, 0, 0)
+        # offset = sizeof(IGVM_VHS_MEMORY_MAP_ENTRY)
         self._add_variable_header(
             IGVM_VHT_MEMORY_MAP, 0, sizeof(IGVM_VHS_MEMORY_MAP_ENTRY))
         self._add_variable_header(IGVM_VHT_PARAMETER_INSERT, gpa, 1, 0)

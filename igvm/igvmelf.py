@@ -139,6 +139,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
             self.state.memory, monitor_params_addr)
         monitor_params.cpuid_page = self.cpuid_page
         monitor_params.secret_page = self.secrets_page
+        # TODO: Change to self.param_page + sizeof(IGVM_VHS_MEMORY_MAP_ENTRY)
         monitor_params.hv_param_page = self.param_page
         monitor_params.vmpl2_start = vmpl2_kernel_addr
         monitor_params.vmpl2_kernel_size = len(self._vmpl2_kernel)
