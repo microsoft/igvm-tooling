@@ -105,7 +105,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         max_addr = 0
         for s in self.elf.elf.iter_sections():
             max_addr = max(max_addr, s.header.sh_addr + s.header.sh_size)
-        monitor_end = max(monitor_end, ALIGN(max_addr - text_start + self._start, PGSIZE))
+        monitor_end = max(monitor_end, ALIGN(max_addr - text_start + kernel_entry, PGSIZE))
         self.state.seek(monitor_end)
 
         # Setup other input data to security monitor
@@ -117,7 +117,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
             sizeof(struct_boot_params))
         end = self.state.memory.allocate(0)
         self.extra_validated_ram.append((addr, end-addr))
-        vmpl2_kernel_addr = 0x2d00000
+        vmpl2_kernel_addr = 0x3d00000
         self.state.vmsa.rip = kernel_entry
         self.state.vmsa.rsi = monitor_params_addr
         # Load VMPL2 kernel
@@ -163,7 +163,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         for addr, size in self.extra_validated_ram:
             e820_table[count].addr = addr
             e820_table[count].size = size
-            e820_table[count].type = E820_TYPE_RAM
+            e820_table[count].type = E820_TYPE_RESERVED
             count += 1
         for i in range(count):
             logging.debug("%x %x"%(e820_table[i].addr, e820_table[i].addr + e820_table[i].size))

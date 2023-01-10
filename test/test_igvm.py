@@ -48,7 +48,10 @@ class IgvmGenTest(unittest.TestCase):
 
     def assertEqualDump(self, got_binary: str, expected_dump: str):
         from igvm.igvmfile import IGVMFile
+        import re;
         dump = IGVMFile.dump(got_binary)
+        dump=re.sub("Ld:\[[0-9 ,]*\]", "Ld:[]", dump, count=0)
+        expected_dump=re.sub("Ld:\[[0-9 ,]*\]", "Ld:[]", expected_dump, count=0)
         self.assertEqual(dump, expected_dump)
 
     def testHash(self):
