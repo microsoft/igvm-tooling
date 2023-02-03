@@ -19,7 +19,9 @@ class IGVMBaseGenerator(object):
         boot_mode = kwargs["boot_mode"]
         self.arch = kwargs["arch"]
         self.state: IGVMFile = IGVMFile(boot_mode=boot_mode,
-                                        config_path=config,  pem=pem)
+                                        config_path=config,
+                                        pem=pem,
+                                        encrypted_page=kwargs["encrypted_page"])
         self.cpuid_page: int = 0
         self.secrets_page: int = 0
         self.param_page: int = 0
