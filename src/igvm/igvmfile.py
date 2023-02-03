@@ -423,8 +423,8 @@ class IGVMFile(VMState):
     def dump(raw):
         return IGVMHeaders.dump(raw)
 
-    def __init__(self, boot_mode: ARCH, config_path: Optional[str], pem: Optional[bytes], encrypted_page: bool):
-        VMState.__init__(self, encrypted_page, boot_mode)
+    def __init__(self, boot_mode: ARCH, config_path: Optional[str], pem: Optional[bytes], encrypted_page: bool, svme: bool):
+        VMState.__init__(self, encrypted_page, svme, boot_mode)
         self.skipped_regions: List[Tuple] = []
         self._not_validated_regions: List[Tuple] = []
         self._config_path = config_path
