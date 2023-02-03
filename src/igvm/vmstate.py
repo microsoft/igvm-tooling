@@ -360,7 +360,7 @@ def allocate_mixpgtable(memory: Memory, monitor_start, monitor_end, encrypted_pa
     return pgd_addr
 
 class VMState(object):
-    def __init__(self, encrypted_page: bool, boot_mode: ARCH = ARCH.X86):
+    def __init__(self, encrypted_page: bool, svme: bool, boot_mode: ARCH = ARCH.X86):
         self.memory = Memory()
         self.vmsa = struct_vmcb_save_area()
         assert boot_mode in (ARCH.X86, ARCH.X64), 'Unsupported arch: %s' % arch
@@ -370,7 +370,7 @@ class VMState(object):
         self.vmsa.cr0 = cr0.val
         self.boot_mode = boot_mode
         efer = UnionRegEfer()
-        efer.reg.SVME = 1
+        efer.reg.SVME = int(svme)
         if self.boot_mode == ARCH.X64:
             efer.reg.SCE = 1
             efer.reg.LME = 1

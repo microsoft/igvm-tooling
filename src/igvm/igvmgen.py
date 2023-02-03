@@ -87,6 +87,8 @@ def main(argv=None):
         '-measurement_file', type=argparse.FileType("w"), help="measurement file", required=False)
     parser.add_argument('-encrypted_page', type=str2bool,
                         default=False, help="Mark pages as encrypted")
+    parser.add_argument('-svme', type=str2bool, default=True,
+                        help="Expose support for SVME")
 
     args = parser.parse_args(argv)
 
