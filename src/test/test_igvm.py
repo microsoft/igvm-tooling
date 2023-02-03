@@ -72,6 +72,7 @@ class IgvmGenTest(unittest.TestCase):
                 "boot_mode": ARCH.X86,
                 "sign_key": None,
                 "kernel": infile,
+                "encrypted_page": False,
             }
             generator = IGVMLinuxGenerator(**PARAMS)
             rawbytes, _ = generator.generate()
@@ -91,6 +92,7 @@ class IgvmGenTest(unittest.TestCase):
                 "boot_mode": ARCH.X64,
                 "sign_key": None,
                 "kernel": infile,
+                "encrypted_page": False,
             }
             generator = IGVMLinuxGenerator(**PARAMS)
             rawbytes, _ = generator.generate()
@@ -110,7 +112,8 @@ class IgvmGenTest(unittest.TestCase):
                 "boot_mode": ARCH.X86,
                 "sign_key": None,
                 "kernel": infile,
-                "shared_payload": MockedFileObj(b'12345678')
+                "shared_payload": MockedFileObj(b'12345678'),
+                "encrypted_page": False,
             }
             generator = IGVMLinux2Generator(**PARAMS)
             rawbytes, _ = generator.generate()
@@ -132,6 +135,7 @@ class IgvmGenTest(unittest.TestCase):
                 "boot_mode": ARCH.X86,
                 "sign_key": None,
                 "kernel": infile,
+                "encrypted_page": False,
             }
             generator = IGVMLinuxGenerator(**PARAMS)
             rawbytes, _ = generator.generate()
@@ -152,7 +156,8 @@ class IgvmGenTest(unittest.TestCase):
                 "boot_mode": ARCH.X86,
                 "sign_key": None,
                 "kernel": infile,
-                "start_addr": 0x1a00000
+                "start_addr": 0x1a00000,
+                "encrypted_page": False,
             }
             generator = IGVMELFGenerator(**PARAMS)
             rawbytes, _ = generator.generate()
