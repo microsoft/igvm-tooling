@@ -462,23 +462,22 @@ class VMState(object):
         DATA_TYPE = 0b0011
 
         gdt = [struct_desc_struct(),  # NULL
-               GdtEntry(0, 0xfffff, CODE_TYPE, NOT_TSS, KERNEL_PRIV,
+               GdtEntry(0, 0xffffffff, CODE_TYPE, NOT_TSS, KERNEL_PRIV,
                         PRESENT, long_mode, 1 - long_mode, USE_PAGE),
-               GdtEntry(0, 0xfffff, CODE_TYPE, NOT_TSS, USER_PRIV,
+               GdtEntry(0, 0xffffffff, CODE_TYPE, NOT_TSS, USER_PRIV,
                         PRESENT, long_mode, 1 - long_mode, USE_PAGE),
-               GdtEntry(0, 0xfffff, DATA_TYPE, NOT_TSS, KERNEL_PRIV,
+               GdtEntry(0, 0xffffffff, DATA_TYPE, NOT_TSS, KERNEL_PRIV,
                         PRESENT, 0, 1, USE_PAGE),
-               GdtEntry(0, 0xfffff, DATA_TYPE, NOT_TSS, USER_PRIV,
+               GdtEntry(0, 0xffffffff, DATA_TYPE, NOT_TSS, USER_PRIV,
                         PRESENT, 0, 1, USE_PAGE), ]
-        """
+
         tss_size = 104
         tss_addr = self.memory.allocate(tss_size)
         if long_mode:
-            print("long")
             gdt.append(TssDesc64(tss_addr, tss_size - 1, CODE_TYPE, ~NOT_TSS, KERNEL_PRIV, PRESENT, 0, 0, 0))
         else:
             gdt.append(TssDesc32(tss_addr, tss_size - 1, CODE_TYPE, ~NOT_TSS, KERNEL_PRIV, PRESENT, 0, 0, 0))
-        """
+
         # allocate GDT from the memory
         gdt_size = sum([sizeof(desc) for desc in gdt])
         gdt_addr = self.memory.allocate(gdt_size)
@@ -493,5 +492,5 @@ class VMState(object):
         self.load_seg(self.vmsa.ds, 0x18)
         self.load_seg(self.vmsa.es, 0x18)
         self.load_seg(self.vmsa.ss, 0x18)
-        #self.load_seg(self.vmsa.tr, 0x28)
+        self.load_seg(self.vmsa.tr, 0x28)
         return start_addr
