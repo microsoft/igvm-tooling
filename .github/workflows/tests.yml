@@ -29,5 +29,6 @@ jobs:
 
           - name: Run pytest
             run: |
+              cd src
               pip install ./
               pytest test
