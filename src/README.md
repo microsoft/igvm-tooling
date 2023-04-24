@@ -2,6 +2,7 @@
 
 ## Install
 ```
+cd src
 sudo apt install acpica-tools
 pip3 install ./
 ```
@@ -45,21 +46,21 @@ So that we do not need to include memory pages for data section in IGVM image.
 ## Code (igvm/)
 
 ### Auto-generated Python from C 
-* igvm/structure/linuxboot.py: data structures for linux booting
-* igvm/structure/igvmfileformat.py: data structures for IGVM format, extracted from windows os repo
+* src/igvm/structure/linuxboot.py: data structures for linux booting
+* src/igvm/structure/igvmfileformat.py: data structures for IGVM format, extracted from windows os repo
 
 ### Real Python code:
 
-* igvm/vmstate.py: for configuring VMSA registers
-* igvm/igvmbase.py: for generating an IGVM image
-* igvm/igvmbzimage.py: for generating an IGVM image from a bzImage
-* igvm/igvmelf.py: for generating an IGVM image from an arbitrary ELF
-* igvm/acpi.py: for convert ACPI table to memory snapshot
+* src/igvm/vmstate.py: for configuring VMSA registers
+* src/igvm/igvmbase.py: for generating an IGVM image
+* src/igvm/igvmbzimage.py: for generating an IGVM image from a bzImage
+* src/igvm/igvmelf.py: for generating an IGVM image from an arbitrary ELF
+* src/igvm/acpi.py: for convert ACPI table to memory snapshot
 
 ## ACPI data
 
-* igvm/acpi/acpi_test: a human-readable ACPI table in DSL format
-* igvm/acpi/acpi.zip: a memory snapshot for an ACPI table without TPM
+* src/igvm/acpi/acpi_test: a human-readable ACPI table in DSL format
+* src/igvm/acpi/acpi.zip: a memory snapshot for an ACPI table without TPM
 
 ## Supported Images
 
@@ -70,11 +71,13 @@ So that we do not need to include memory pages for data section in IGVM image.
 
 ## Tests
 ```
+cd src
 pytest-3 test
 ```
 
 ## Coverage
 ```
+cd src
 coverage run --source igvm -m pytest
 coverage report -m
 ```
