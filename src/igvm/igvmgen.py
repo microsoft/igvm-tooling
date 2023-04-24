@@ -1,5 +1,6 @@
 import argparse
 import sys
+import json
 import logging
 
 from distutils.log import INFO
@@ -82,6 +83,8 @@ def main(argv=None):
         '-start_addr', type=int, default=0x1a00000, help="start gpa for the image")
     parser.add_argument(
         '-shared_payload', type=argparse.FileType('rb'), help="content to be populated to guest-invalid memory(shared between hypervisor and guest), skipping expensive PSP commands")
+    parser.add_argument(
+        '-measurement_file', type=argparse.FileType("w"), help="measurement file", required=False)
 
     args = parser.parse_args(argv)
 
@@ -90,8 +93,13 @@ def main(argv=None):
     elif args.o:
         assert args.inform in Generators
         generator = Generators[args.inform](**vars(args))
-        rawbytes = generator.generate()
+        rawbytes, measurement = generator.generate()
         args.o.write(rawbytes)
+        if args.measurement_file:
+             with args.measurement_file as f:
+                info = {"sevsnpvm-launchmeasurement": measurement}
+                print(info)
+                json.dump(info, f, indent=2)
     else:
         parser.print_help()
 

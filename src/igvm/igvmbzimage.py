@@ -64,7 +64,7 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
 
         rdinit = kwargs["rdinit"] if "rdinit" in kwargs else None
         self.ramdisk: bytes = bytes(
-            rdinit.read(), 'ascii') if rdinit else bytes(0)
+            rdinit.read()) if rdinit else bytes(0)
 
     @property
     def _header(self) -> setup_header:

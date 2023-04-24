@@ -597,4 +597,4 @@ class IGVMFile(VMState):
         body = bytearray()
         for h in igvm_headers.nonempty_page_header_iter():
             body.extend(self.memory[h.GPA:h.GPA + PGSIZE])
-        return igvm_headers.marshal() + body
+        return igvm_headers.marshal() + body, igvm_headers.curr_digest.hex()
