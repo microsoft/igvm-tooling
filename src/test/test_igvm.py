@@ -74,7 +74,7 @@ class IgvmGenTest(unittest.TestCase):
                 "kernel": infile,
             }
             generator = IGVMLinuxGenerator(**PARAMS)
-            rawbytes = generator.generate()
+            rawbytes, _ = generator.generate()
 
         with open("test/tests/test_bzImage.dump", "r") as f:
             expected_dump = f.read()
@@ -93,7 +93,7 @@ class IgvmGenTest(unittest.TestCase):
                 "kernel": infile,
             }
             generator = IGVMLinuxGenerator(**PARAMS)
-            rawbytes = generator.generate()
+            rawbytes, _ = generator.generate()
 
         with open("test/tests/test_bzImage_x64.dump", "r") as f:
             expected_dump = f.read()
@@ -113,7 +113,7 @@ class IgvmGenTest(unittest.TestCase):
                 "shared_payload": MockedFileObj(b'12345678')
             }
             generator = IGVMLinux2Generator(**PARAMS)
-            rawbytes = generator.generate()
+            rawbytes, _ = generator.generate()
         from igvm.igvmfile import IGVMFile
         dump = IGVMFile.dump(rawbytes)
         with open("test/tests/test_bzImage2.dump", "r") as f:
@@ -134,7 +134,7 @@ class IgvmGenTest(unittest.TestCase):
                 "kernel": infile,
             }
             generator = IGVMLinuxGenerator(**PARAMS)
-            rawbytes = generator.generate()
+            rawbytes, _ = generator.generate()
 
         with open("test/tests/test_bzImage_noopt.dump", "r") as f:
             expected_dump = f.read()
@@ -155,7 +155,7 @@ class IgvmGenTest(unittest.TestCase):
                 "start_addr": 0x1a00000
             }
             generator = IGVMELFGenerator(**PARAMS)
-            rawbytes = generator.generate()
+            rawbytes, _ = generator.generate()
             infile.close()
         with open("test/tests/test_elf.dump", "r") as f:
             expected_dump = f.read()
