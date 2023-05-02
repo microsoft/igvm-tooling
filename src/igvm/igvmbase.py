@@ -18,7 +18,10 @@ class IGVMBaseGenerator(object):
         pem = sign_key.read() if sign_key else None
         boot_mode = kwargs["boot_mode"]
         self.state: IGVMFile = IGVMFile(boot_mode=boot_mode,
-                                        config_path=config,  pem=pem)
+                                        config_path=config,
+                                        pem=pem,
+                                        encrypted_page=kwargs["encrypted_page"],
+                                        svme=kwargs["svme"])
         self.cpuid_page: int = 0
         self.secrets_page: int = 0
         self.param_page: int = 0

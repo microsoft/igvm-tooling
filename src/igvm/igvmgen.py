@@ -85,6 +85,10 @@ def main(argv=None):
         '-shared_payload', type=argparse.FileType('rb'), help="content to be populated to guest-invalid memory(shared between hypervisor and guest), skipping expensive PSP commands")
     parser.add_argument(
         '-measurement_file', type=argparse.FileType("w"), help="measurement file", required=False)
+    parser.add_argument('-encrypted_page', type=str2bool,
+                        default=False, help="Mark pages as encrypted")
+    parser.add_argument('-svme', type=str2bool, default=True,
+                        help="Expose support for SVME")
 
     args = parser.parse_args(argv)
 

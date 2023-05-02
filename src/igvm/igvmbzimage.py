@@ -216,7 +216,9 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         addr = self.state.setup_paging()
         self.state.setup_gdt()
         boot_params_addr = self.state.memory.allocate(sizeof(boot_params))
-        cmdline_addr = self.state.memory.allocate(len(self.cmdline))
+        # Align to PAGE_SIZE. This seeems like a requirement for linux kernel.
+        cmdline_size = 4096 - ((boot_params_addr + len(self.cmdline)) % 4096) + len(self.cmdline)
+        cmdline_addr = self.state.memory.allocate(cmdline_size)
         ramdisk_addr = self.state.memory.allocate(len(self.ramdisk))
         boot_stack_addr = self.state.memory.allocate(PGSIZE)
         end = self.state.memory.allocate(0, PGSIZE)
@@ -241,6 +243,7 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         self.state.vmsa.rip = kernel_entry
         self.state.vmsa.rsi = boot_params_addr
         self.state.vmsa.rsp = boot_stack_addr + PGSIZE
+        self.state.vmsa.rflags = 2
 
 
 class IGVMLinux2Generator(IGVMLinuxGenerator):
