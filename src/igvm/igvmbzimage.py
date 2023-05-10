@@ -63,7 +63,7 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         self.acpidata: ACPI = ACPI(acpi_dir)
 
         rdinit = kwargs["rdinit"] if "rdinit" in kwargs else None
-        self.ramdisk: bytes = bytes(
+        self.ramdisk: bytearray = bytearray(
             rdinit.read()) if rdinit else bytes(0)
 
     @property
