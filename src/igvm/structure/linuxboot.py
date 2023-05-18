@@ -698,6 +698,25 @@ struct_boot_params._fields_ = [
     ('_pad9', ctypes.c_ubyte * 276),
 ]
 
+CC_BLOB_SEV_HDR_MAGIC = 0x45444d41
+
+
+class struct_cc_blob_sev_info(Structure):
+    pass
+
+
+struct_cc_blob_sev_info._pack_ = 1
+struct_cc_blob_sev_info._fields_ = [('magic', ctypes.c_uint32),
+                                    ('version', ctypes.c_uint16),
+                                    ('reserved', ctypes.c_uint16),
+                                    ('secrets_phys', ctypes.c_uint64),
+                                    ('secrets_len', ctypes.c_uint32),
+                                    ('rsvd1', ctypes.c_uint32),
+                                    ('cpuid_phys', ctypes.c_uint64),
+                                    ('cpuid_len', ctypes.c_uint32),
+                                    ('rsvd2', ctypes.c_uint32)]
+
+
 class struct_desc_struct(Structure):
     pass
 
