@@ -212,7 +212,7 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
 
         return kernel_base + (0x200 if self.state.boot_mode == ARCH.X64 else 0)
 
-    def setup_after_code(self, kernel_entry: int):
+    def setup_after_code(self, kernel_entry: int, cc_blob: int):
         addr = self.state.setup_paging()
         self.state.setup_gdt()
         boot_params_addr = self.state.memory.allocate(sizeof(boot_params))
@@ -234,6 +234,7 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         params.hdr.ramdisk_image = ramdisk_addr
         params.hdr.ramdisk_size = len(self.ramdisk)
         params.acpi_rsdp_addr = ACPI_RSDP_ADDR
+        params.cc_blob_address = cc_blob
         # give 1GB to the kernel
         if not self._use_pvalidate_opt:
             params.e820_entries = self._setup_e820(params.e820_table)
@@ -256,8 +257,8 @@ class IGVMLinux2Generator(IGVMLinuxGenerator):
         _infile2 = kwargs["shared_payload"]
         self._shared_payload: bytearray = bytearray(_infile2.read())
 
-    def setup_after_code(self, kernel_entry: int):
-        IGVMLinuxGenerator.setup_after_code(self, kernel_entry)
+    def setup_after_code(self, kernel_entry: int, cc_blob: int):
+        IGVMLinuxGenerator.setup_after_code(self, kernel_entry, cc_blob)
         linux2_start = 0x10000000  # TODO: linux2 param
         self.state.seek(linux2_start)
         self.state.memory.allocate(len(self._shared_payload))
