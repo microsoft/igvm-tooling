@@ -3,6 +3,7 @@ import argparse
 from abc import abstractclassmethod
 
 from igvm.igvmfile import IGVMFile, PGSIZE
+from igvm.structure.linuxboot import struct_cc_blob_sev_info, CC_BLOB_SEV_HDR_MAGIC
 
 
 class IGVMBaseGenerator(object):
@@ -50,12 +51,23 @@ class IGVMBaseGenerator(object):
         self.cpuid_page = self.state.memory.allocate(PGSIZE)
         self.secrets_page = self.state.memory.allocate(PGSIZE)
         self.param_page = self.state.memory.allocate(PGSIZE)
-        # VMSA page at 0x803000
+        self.sev_info_page = self.state.memory.allocate(PGSIZE)
+
+        sev_info = struct_cc_blob_sev_info.from_buffer(
+            self.state.memory, self.sev_info_page)
+        sev_info.magic = CC_BLOB_SEV_HDR_MAGIC
+        sev_info.secrets_phys = self.secrets_page
+        sev_info.secrets_len = PGSIZE
+        sev_info.cpuid_phys = self.cpuid_page
+        sev_info.cpuid_len = PGSIZE
+        del sev_info
+
+        # VMSA page at 0x804000
         vmsa_page = self.state.memory.allocate(PGSIZE)  # VMSA page
         # Load vmlinux image
         kernel_entry = self.load_code()
 
         # Allocate gdt, boot_params, cmdline and ramdisk pages
-        self.setup_after_code(kernel_entry)
+        self.setup_after_code(kernel_entry, self.sev_info_page)
         return self.state.raw(
-            vmsa_page, self.cpuid_page, self.secrets_page, self.param_page, self._vtl)
+            vmsa_page, self.cpuid_page, self.secrets_page, self.param_page, self.sev_info_page, self._vtl)

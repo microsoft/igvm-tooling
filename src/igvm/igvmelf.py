@@ -98,7 +98,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         self.state.memory.write(vmpl2_addr, self._vmpl2_kernel)
         self.extra_validated_ram.append((vmpl2_addr, len(self._vmpl2_kernel)))
 
-    def setup_after_code(self, kernel_entry: int):
+    def setup_after_code(self, kernel_entry: int, cc_blob: int):
         # Skip all sections
         text_start = self.elf.elf.get_section_by_name(".text").header.sh_addr
         monitor_end = ALIGN(self.state.memory.allocate(0), PGSIZE)

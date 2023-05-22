@@ -558,7 +558,7 @@ class IGVMFile(VMState):
         return id_block
 
     def raw(self, vmsa_page: int, cpuid_page: int, secret_page: int,
-            param_page: int, vtl: int):
+            param_page: int, sev_info_page: int, vtl: int):
         # fill in VMSA/SECRET/PARAM page
         assert not self.is_skipped(vmsa_page)
         assert not self.is_skipped(cpuid_page)
@@ -578,6 +578,8 @@ class IGVMFile(VMState):
                 igvm_headers.add_vmsa_page(gpa, page)
             elif gpa == param_page:
                 igvm_headers.add_param_page(gpa, page)
+            elif gpa == sev_info_page:
+                igvm_headers.add_measured_normal_page(gpa, page)
             elif gpa == cpuid_page:
                 igvm_headers.add_cpuid_page(gpa, page)
             elif gpa == secret_page:
