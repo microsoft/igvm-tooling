@@ -61,10 +61,9 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
 
         acpi_dir = kwargs["acpi_dir"] if "acpi_dir" in kwargs else None
         self.acpidata: ACPI = ACPI(acpi_dir)
-
         rdinit = kwargs["rdinit"] if "rdinit" in kwargs else None
-        self.ramdisk: bytes = bytes(
-            rdinit.read()) if rdinit else bytes(0)
+        self.ramdisk: bytearray = bytearray(
+            rdinit.read()) if rdinit else bytearray()
 
     @property
     def _header(self) -> setup_header:
@@ -216,8 +215,9 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         addr = self.state.setup_paging()
         self.state.setup_gdt()
         boot_params_addr = self.state.memory.allocate(sizeof(boot_params))
-        cmdline_addr = self.state.memory.allocate(len(self.cmdline))
-        ramdisk_addr = self.state.memory.allocate(len(self.ramdisk))
+        cmdline_addr = self.state.memory.allocate(len(self.cmdline) + 1)
+        # RAMDISK memory must be page aligned.
+        ramdisk_addr = self.state.memory.allocate(len(self.ramdisk), PGSIZE)
         boot_stack_addr = self.state.memory.allocate(PGSIZE)
         end = self.state.memory.allocate(0, PGSIZE)
         self._extra_validated_ram.append((addr, end-addr))
@@ -231,6 +231,7 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         params.hdr.cmdline_size = len(self.cmdline)
         params.hdr.ramdisk_image = ramdisk_addr
         params.hdr.ramdisk_size = len(self.ramdisk)
+        logging.info(f"ramdisk at {hex(ramdisk_addr)}")
         params.acpi_rsdp_addr = ACPI_RSDP_ADDR
         # give 1GB to the kernel
         if not self._use_pvalidate_opt:
