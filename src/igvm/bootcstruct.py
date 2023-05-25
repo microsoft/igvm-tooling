@@ -7,19 +7,22 @@ from typing import Sequence
 
 DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 OUT_DIR = os.path.join(DIR_PATH, "structure")
-LINUX_DIR = os.path.join(DIR_PATH, "../snplinux")
+#LINUX_DIR = os.path.join(DIR_PATH, "../snplinux")
+LINUX_DIR = "/home/mchamarthy/work/LSG-linux-rolling"
 MONITOR_DIR = os.path.join(DIR_PATH, "../../snp-sm")
 WIN_OS_DIR = os.path.join(DIR_PATH, "../os/src")
 WIN_SDK_DIR = "/mnt/c/"
-INCLUDE_DIRS = ("arch/x86/include", "include", "")
+INCLUDE_DIRS = ("arch/x86/include", "include", "include/asm-generic", "")
 BOOT_SOURCES = ("arch/x86/include/uapi/asm/bootparam.h",
                 "arch/x86/include/asm/e820/types.h",
                 "arch/x86/include/asm/svm.h",
                 "arch/x86/include/asm/desc_defs.h",
                 "arch/x86/include/asm/segment.h",
-                "include/acpi/acpi.h")
+                "include/acpi/acpi.h",
+                "include/asm-generic/rwonce.h",
+                "arch/x86/include/asm/sev.h")
 
-LINUX_SYMBOLS = ("e820_type", "struct_vmcb_save_area", "struct_boot_params",
+LINUX_SYMBOLS = ("e820_type", "struct_vmcb_save_area", "struct_boot_params", "struct_cc_blob_sev_info",
                  "struct_desc_struct", "struct_acpi_table_rsdp", "struct_acpi_table_header")
 
 MONITOR_SOURCES = ("monitor/include/monitor.h",)
@@ -50,6 +53,12 @@ def _load_struct_from_c(src_dir: str, cpath: Sequence[str], pypath: str, symbols
         cfg.clang_opts.append("-DUINT64=long")
         cfg.clang_opts.append("-DUINT16=short")
         cfg.clang_opts.append("-DUINT8=char")
+        cfg.clang_opts.append("-D__no_sanitize_or_inline=")
+        cfg.clang_opts.append("-D__no_kasan_or_inline=")
+        cfg.clang_opts.append("-D__attribute_const__=")
+        cfg.clang_opts.append("-Dpgd_t=int")
+        cfg.clang_opts.append("-D__init=")
+
     srcs = [os.path.join(src_dir, source) for source in cpath]
     with open(bootparam_path, 'w') as f:
         translate_files(srcs, f, cfg)

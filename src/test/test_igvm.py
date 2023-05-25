@@ -156,6 +156,7 @@ class IgvmGenTest(unittest.TestCase):
             generator = IGVMELFGenerator(**PARAMS)
             rawbytes, _ = generator.generate()
             infile.close()
+    
         with open("test/tests/test_elf.dump", "r") as f:
             expected_dump = f.read()
             self.assertEqualDump(bytes(rawbytes), expected_dump)
