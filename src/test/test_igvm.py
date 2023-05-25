@@ -50,8 +50,8 @@ class IgvmGenTest(unittest.TestCase):
         from igvm.igvmfile import IGVMFile
         import re;
         dump = IGVMFile.dump(got_binary)
-        dump=re.sub("Ld:\[[0-9 ,]*\]", "Ld:[]", dump, count=0)
-        expected_dump=re.sub("Ld:\[[0-9 ,]*\]", "Ld:[]", expected_dump, count=0)
+        dump=re.sub(r"Ld:\[[0-9 ,]*\]", "Ld:[]", dump, count=0)
+        expected_dump=re.sub(r"Ld:\[[0-9 ,]*\]", "Ld:[]", expected_dump, count=0)
         self.assertEqual(dump, expected_dump)
 
     def testHash(self):
@@ -114,8 +114,7 @@ class IgvmGenTest(unittest.TestCase):
             }
             generator = IGVMLinux2Generator(**PARAMS)
             rawbytes, _ = generator.generate()
-        from igvm.igvmfile import IGVMFile
-        dump = IGVMFile.dump(rawbytes)
+
         with open("test/tests/test_bzImage2.dump", "r") as f:
             expected_dump = f.read()
             self.assertEqualDump(bytes(rawbytes), expected_dump)
