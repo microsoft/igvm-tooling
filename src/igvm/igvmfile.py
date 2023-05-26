@@ -482,6 +482,7 @@ class IGVMFile(VMState):
                         (CpuIdFunctionExtendedStateEnumeration, 5),
                         (CpuIdFunctionExtendedStateEnumeration, 6),
                         (CpuIdFunctionExtendedStateEnumeration, 7),
+                        (CpuIdFunctionExtendedStateEnumeration, 8),
                         (CpuIdFunctionExtendedBrandingString1, 0),
                         (CpuIdFunctionExtendedBrandingString2, 0),
                         (CpuIdFunctionExtendedBrandingString3, 0),
@@ -526,8 +527,8 @@ class IGVMFile(VMState):
 
     def gen_vmsa(self) -> struct_vmcb_save_area:
         """Return SVM_VMSA page content"""
-        self.vmsa.vmcb_save_area_0.vmcb_save_area_0_0.sev_feature_snp = 1
-        self.vmsa.vmcb_save_area_0.vmcb_save_area_0_0.sev_feature_restrict_injection = 1
+        self.vmsa._0._0.sev_feature_snp = 1
+        self.vmsa._0._0.sev_feature_restrict_injection = 1
         self.vmsa.virtual_tom = 0x0
         self.vmsa.xcr0 = 0x1
         return self.vmsa

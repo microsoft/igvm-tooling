@@ -219,9 +219,13 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         # RAMDISK memory must be page aligned.
         ramdisk_addr = self.state.memory.allocate(len(self.ramdisk), PGSIZE)
         boot_stack_addr = self.state.memory.allocate(PGSIZE)
+        self.cc_blob_addr = self.state.memory.allocate(PGSIZE)
         end = self.state.memory.allocate(0, PGSIZE)
         self._extra_validated_ram.append((addr, end-addr))
         params = boot_params.from_buffer(self.state.memory, boot_params_addr)
+        cc_blob_addr = self.cc_blob_addr
+        cc_blob = struct_cc_blob_sev_info.from_buffer(self.state.memory, cc_blob_addr)
+
         self.state.memory.write(cmdline_addr, self.cmdline)
         self.state.memory.write(ramdisk_addr, self.ramdisk)
         params.hdr = self._header
@@ -233,11 +237,24 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         params.hdr.ramdisk_size = len(self.ramdisk)
         logging.info(f"ramdisk at {hex(ramdisk_addr)}")
         params.acpi_rsdp_addr = ACPI_RSDP_ADDR
+        params.cc_blob_address = cc_blob_addr
+
+        CC_BLOB_SEV_HDR_MAGIC =	0x45444d41
+        cc_blob.magic = CC_BLOB_SEV_HDR_MAGIC
+        cc_blob.reserved = 0
+        cc_blob.secrets_phys = self.secrets_page
+        cc_blob.secrets_len = PGSIZE
+        cc_blob.cpuid_phys = self.cpuid_page
+        cc_blob.cpuid_len = PGSIZE
+        cc_blob.rsvd2 = 0
+
         # give 1GB to the kernel
         if not self._use_pvalidate_opt:
             params.e820_entries = self._setup_e820(params.e820_table)
         else:
             params.e820_entries = self._setup_e820_opt(params.e820_table)
+
+        del cc_blob
         del params  # kill reference to re-allow allocation
         self.state.vmsa.rip = kernel_entry
         self.state.vmsa.rsi = boot_params_addr
