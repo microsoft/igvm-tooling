@@ -120,6 +120,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         vmpl2_kernel_addr = 0x3d00000
         self.state.vmsa.rip = kernel_entry
         self.state.vmsa.rsi = monitor_params_addr
+        self.state.vmsa.rflags = 2
         # Load VMPL2 kernel
         self.load_vmpl2_kernel(vmpl2_kernel_addr)
 
