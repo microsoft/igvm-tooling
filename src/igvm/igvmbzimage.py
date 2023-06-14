@@ -259,7 +259,6 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         self.state.vmsa.rip = kernel_entry
         self.state.vmsa.rsi = boot_params_addr
         self.state.vmsa.rsp = boot_stack_addr + PGSIZE
-        self.state.vmsa.rflags = 2
 
 
 class IGVMLinux2Generator(IGVMLinuxGenerator):
