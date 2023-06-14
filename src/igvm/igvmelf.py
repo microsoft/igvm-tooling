@@ -11,7 +11,7 @@ from igvm.bootcstruct import *
 from igvm.acpi import ACPI, ACPI_RSDP_ADDR
 from igvm.igvmbase import IGVMBaseGenerator
 from igvm.igvmfile import PGSIZE, ALIGN
-from igvm.vmstate import ARCH
+from igvm.vmstate import ARCH, Arch
 boot_params = struct_boot_params
 setup_header = struct_setup_header
 
@@ -24,6 +24,7 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         IGVMBaseGenerator.__init__(self, **kwargs)
         self.extra_validated_ram: List = []
         self._start = kwargs["start_addr"]
+        self.arch = kwargs["arch"]
 
         acpi_dir = kwargs["acpi_dir"] if "acpi_dir" in kwargs else None
         self.acpidata: ACPI = ACPI(acpi_dir)
@@ -120,7 +121,8 @@ class IGVMELFGenerator(IGVMBaseGenerator):
         vmpl2_kernel_addr = 0x3d00000
         self.state.vmsa.rip = kernel_entry
         self.state.vmsa.rsi = monitor_params_addr
-        self.state.vmsa.rflags = 2
+        if self.arch == Arch.Intel:
+            self.state.vmsa.rflags = 2
         # Load VMPL2 kernel
         self.load_vmpl2_kernel(vmpl2_kernel_addr)
 

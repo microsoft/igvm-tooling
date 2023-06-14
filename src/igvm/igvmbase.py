@@ -17,6 +17,7 @@ class IGVMBaseGenerator(object):
         sign_key = kwargs["sign_key"] if "sign_key" in kwargs else None
         pem = sign_key.read() if sign_key else None
         boot_mode = kwargs["boot_mode"]
+        self.arch = kwargs["arch"]
         self.state: IGVMFile = IGVMFile(boot_mode=boot_mode,
                                         config_path=config,  pem=pem)
         self.cpuid_page: int = 0

@@ -35,6 +35,11 @@ class ARCH(Enum):
     X64 = 'x64'
 
 
+class Arch(Enum):
+    Intel = "Intel"
+    AMD = "AMD"
+
+
 class SegAttr(Structure):
     _fields_ = [('type', c_uint16, 4),
                 ('s', c_uint16, 1),

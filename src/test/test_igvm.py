@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, patch
-from igvm.vmstate import ARCH
+from igvm.vmstate import ARCH, Arch
 import tracemalloc
 
 
@@ -70,6 +70,7 @@ class IgvmGenTest(unittest.TestCase):
                 "vtl": 2,
                 "acpi_dir": TEST_ACPI,
                 "boot_mode": ARCH.X86,
+                "arch": Arch.Intel,
                 "sign_key": None,
                 "kernel": infile,
             }
@@ -89,6 +90,7 @@ class IgvmGenTest(unittest.TestCase):
                 "symbol_elf": "",
                 "vtl": 2,
                 "boot_mode": ARCH.X64,
+                "arch": Arch.Intel,
                 "sign_key": None,
                 "kernel": infile,
             }
@@ -108,6 +110,7 @@ class IgvmGenTest(unittest.TestCase):
                 "symbol_elf": "",
                 "vtl": 2,
                 "boot_mode": ARCH.X86,
+                "arch": Arch.Intel,
                 "sign_key": None,
                 "kernel": infile,
                 "shared_payload": MockedFileObj(b'12345678')
@@ -129,6 +132,7 @@ class IgvmGenTest(unittest.TestCase):
                 "vtl": 2,
                 "acpi_dir": TEST_ACPI,
                 "boot_mode": ARCH.X86,
+                "arch": Arch.Intel,
                 "sign_key": None,
                 "kernel": infile,
             }
@@ -149,6 +153,7 @@ class IgvmGenTest(unittest.TestCase):
                 "vtl": 2,
                 "acpi_dir": None,
                 "boot_mode": ARCH.X86,
+                "arch": Arch.Intel,
                 "sign_key": None,
                 "kernel": infile,
                 "start_addr": 0x1a00000

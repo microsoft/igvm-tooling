@@ -11,7 +11,7 @@ from igvm.bootcstruct import *
 from igvm.igvmbzimage import IGVMLinuxGenerator, IGVMLinux2Generator
 from igvm.igvmelf import IGVMELFGenerator
 from igvm.igvmfile import IGVMFile
-from igvm.vmstate import ARCH
+from igvm.vmstate import ARCH, Arch
 
 
 class INFORM(Enum):
@@ -46,6 +46,8 @@ def main(argv=None):
         metavar='igvmfile.bin', help='igvmfile for inspection')
     parser.add_argument(
         '-inform', type=INFORM, default=INFORM.bzImage, help='igvm input format', required=False)
+    parser.add_argument(
+        '-arch', type=Arch, default=Arch.Intel, help='hardware architecture', required=False)
     parser.add_argument(
         '-o', type=argparse.FileType('wb'),
         metavar='igvmfile.bin', help='igvmfile to output')
