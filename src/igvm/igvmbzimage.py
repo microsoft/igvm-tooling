@@ -8,7 +8,7 @@ from igvm.acpi import ACPI, ACPI_RSDP_ADDR
 from igvm.bootcstruct import *
 from igvm.igvmbase import IGVMBaseGenerator
 from igvm.igvmfile import PGSIZE, ALIGN
-from igvm.vmstate import ARCH
+from igvm.vmstate import ARCH, Arch
 
 boot_params = struct_boot_params
 setup_header = struct_setup_header
@@ -259,7 +259,8 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         self.state.vmsa.rip = kernel_entry
         self.state.vmsa.rsi = boot_params_addr
         self.state.vmsa.rsp = boot_stack_addr + PGSIZE
-        self.state.vmsa.rflags = 2
+        if self.arch == Arch.Intel:
+            self.state.vmsa.rflags = 2
 
 
 class IGVMLinux2Generator(IGVMLinuxGenerator):
