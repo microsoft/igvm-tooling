@@ -32,13 +32,13 @@ jobs:
 
       - name: Generate Artifact
         run: |
-          cd src/test/kernel
+          cd test/kernel
           igvmgen -o kernelinitrd.bin -kernel bzImage -append "8250_core.nr_uarts=0 panic=-1 debug loglevel=7 root=/dev/sda rdinit=/startup.sh" -rdinit initramfs.cpio.gz -vtl 0
-          ${{ github.workspace }}/src/test/kernel/vmgstool create --filepath kernelinitrd.vmgs --filesize 67108864
-          ${{ github.workspace }}/src/test/kernel/vmgstool write --filepath kernelinitrd.vmgs --datapath kernelinitrd.bin -i=8
+          ${{ github.workspace }}/test/kernel/vmgstool create --filepath kernelinitrd.vmgs --filesize 67108864
+          ${{ github.workspace }}/test/kernel/vmgstool write --filepath kernelinitrd.vmgs --datapath kernelinitrd.bin -i=8
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
           name: my-artifact
-          path: src/test/kernel/kernelinitrd.vmgs
+          path: test/kernel/kernelinitrd.vmgs

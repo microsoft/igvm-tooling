@@ -4,7 +4,7 @@ from igvm.vmstate import ARCH, Arch
 import tracemalloc
 
 
-TEST_ACPI = "igvm/acpi/acpi-test"
+TEST_ACPI = "src/igvm/acpi/acpi-test"
 
 
 class MockedFileObj:

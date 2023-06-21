@@ -31,6 +31,7 @@ jobs:
 
           - name: Run pytest
             run: |
-              cd src
+              pushd src
               pip install ./
+              popd
               pytest test
