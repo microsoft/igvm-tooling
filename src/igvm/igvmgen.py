@@ -42,55 +42,127 @@ def main(argv=None):
                         level=logging_args.log_level)
     parser = argparse.ArgumentParser(parents=[logging_argparse])
     parser.add_argument(
-        '-d', type=argparse.FileType('rb'),
-        metavar='igvmfile.bin', help='igvmfile for inspection')
+        '-d',
+        type=argparse.FileType('rb'),
+        metavar='igvmfile.bin',
+        help='igvmfile for inspection'
+    )
     parser.add_argument(
-        '-inform', type=INFORM, default=INFORM.bzImage, help='igvm input format', required=False)
+        '-inform',
+        type=INFORM,
+        default=INFORM.bzImage,
+        help='igvm input format',
+        required=False
+    )
     parser.add_argument(
-        '-arch', type=Arch, default=Arch.Intel, help='hardware architecture', required=False)
+        '-arch',
+        type=Arch,
+        default=Arch.Intel,
+        help='hardware architecture',
+        required=False
+    )
     parser.add_argument(
-        '-o', type=argparse.FileType('wb'),
-        metavar='igvmfile.bin', help='igvmfile to output')
+        '-o',
+        type=argparse.FileType('wb'),
+        metavar='igvmfile.bin',
+        help='igvmfile to output'
+    )
     parser.add_argument(
-        '-kernel', type=argparse.FileType('rb'),
-        help='Input image. bzImage or ELF depends on inform')
+        '-kernel',
+        type=argparse.FileType('rb'),
+        help='Input image. bzImage or ELF depends on inform'
+    )
     parser.add_argument(
-        '-vmpl2_kernel', type=argparse.FileType('rb'),
-        help='Input image. bzImage or ELF depends on inform')
+        '-vmpl2_kernel',
+        type=argparse.FileType('rb'),
+        help='Input image. bzImage or ELF depends on inform'
+    )
     parser.add_argument(
-        '-pgtable_level', type=int,
-        help='2-level or 4-level paging')
+        '-pgtable_level',
+        type=int,
+        help='2-level or 4-level paging'
+    )
     parser.add_argument(
-        '-symbol_elf', type=argparse.FileType('rb'), help='arch/x86/boot/compressed/vmlinux')
-    parser.add_argument('-append', type=str, metavar='cmdline')
+        '-symbol_elf',
+        type=argparse.FileType('rb'),
+        help='arch/x86/boot/compressed/vmlinux'
+    )
     parser.add_argument(
-        '-rdinit', type=argparse.FileType('rb'),
-        metavar='ramdisk')
-    parser.add_argument('-vtl', type=int, metavar='2', default=2,
-                        help='highest vtl')
-    parser.add_argument('-config_file', type=str,
-                        help='igvm config file', required=False)
+        '-append',
+        type=str,
+        metavar='cmdline'
+    )
     parser.add_argument(
-        '-sign_key', type=argparse.FileType('rb'),
-        help='private signing key', required=False)
+        '-rdinit',
+        type=argparse.FileType('rb'),
+        metavar='ramdisk'
+    )
     parser.add_argument(
-        '-acpi_dir', type=str,
-        help='ACPI folder', required=False)
+        '-vtl',
+        type=int,
+        metavar='2',
+        default=2,
+        help='highest vtl'
+    )
     parser.add_argument(
-        '-pvalidate_opt', type=str2bool, default=True,
-        help='Pvalidate Optimization for fast booting (Check your kernel code to see whether the early boot code can pvalidate guest MEM on demand)')
+        '-config_file',
+        type=str,
+        help='igvm config file',
+        required=False
+    )
     parser.add_argument(
-        '-boot_mode', type=ARCH, default="x86", help='Boot mode (x86 or x64)')
+        '-sign_key',
+        type=argparse.FileType('rb'),
+        help='private signing key',
+        required=False
+    )
     parser.add_argument(
-        '-start_addr', type=int, default=0x1a00000, help="start gpa for the image")
+        '-acpi_dir',
+        type=str,
+        help='ACPI folder',
+        required=False
+    )
     parser.add_argument(
-        '-shared_payload', type=argparse.FileType('rb'), help="content to be populated to guest-invalid memory(shared between hypervisor and guest), skipping expensive PSP commands")
+        '-pvalidate_opt',
+        type=str2bool,
+        default=True,
+        help='Pvalidate Optimization for fast booting (Check your kernel code to see whether the early boot code can pvalidate guest MEM on demand)'
+    )
     parser.add_argument(
-        '-measurement_file', type=argparse.FileType("w"), help="measurement file", required=False)
-    parser.add_argument('-encrypted_page', type=str2bool,
-                        default=True, help="Mark pages as encrypted")
-    parser.add_argument('-svme', type=str2bool, default=True,
-                        help="Expose support for SVME")
+        '-boot_mode',
+        type=ARCH,
+        default="x86",
+        help='Boot mode (x86 or x64)'
+    )
+    parser.add_argument(
+        '-start_addr',
+        type=int,
+        default=0x1a00000,
+        help="start gpa for the image"
+    )
+    parser.add_argument(
+        '-shared_payload',
+        type=argparse.FileType('rb'),
+        help="content to be populated to guest-invalid memory(shared between hypervisor and guest), skipping expensive PSP commands"
+    )
+    parser.add_argument(
+        '-measurement_file',
+        type=argparse.FileType("w"),
+        help="measurement file",
+        required=False
+    )
+    parser.add_argument(
+        '-encrypted_page',
+        type=str2bool,
+        default=True,
+        help="Mark pages as encrypted"
+    )
+    parser.add_argument(
+        '-svme',
+        type=str2bool,
+        default=True,
+        help="Expose support for SVME"
+    )
 
     args = parser.parse_args(argv)
 
