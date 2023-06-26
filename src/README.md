@@ -60,6 +60,7 @@ So that we do not need to include memory pages for data section in IGVM image.
 ## ACPI data
 
 * src/igvm/acpi/acpi_test: a human-readable ACPI table in DSL format
+* src/igvm/acpi/acpi-clh: a human-readable ACPI table in DSL format for CloudHypervisor guests
 * src/igvm/acpi/acpi.zip: a memory snapshot for an ACPI table without TPM
 
 ## Supported Images
@@ -67,6 +68,25 @@ So that we do not need to include memory pages for data section in IGVM image.
 * SNP enlightened: https://github.com/wdcui/linux (public), https://github.com/MSRSSP/snplinux
 * SNP vmpl0 as security monitor: https://github.com/MSRSSP/snp-sm
 * [ongoing] verified SNP monitor: https://github.com/MSRSSP/verus-snp-sm
+
+## Cloud Hypervisor support
+We may use the same tool to create IGVM files that [Cloud Hypervisor](https://www.cloudhypervisor.org/) VMM can use to load a confidential guest.
+The default set of ACPI tables do not function when using this programme to generate IGVM files for Cloud Hypervisor, thus you must pick one of
+the folders under 'igvm/acpi/acpi-clh'. There are several folders under 'igvm/acpi/acpi-clh', and the name of the folder represents the number
+of CPUs you want the guest to boot with. Here is a sample command that you could use to generate an IGVM file for a guest with 2 vcpus:
+
+```
+$(IGVMGEN) -o $(OUTPUT) \
+		-kernel $(LINUX)/arch/x86/boot/bzImage \
+		-append "$(CMDLINE)" \
+		-boot_mode x64 \
+		-vtl 0 \
+		-inform bzImage \
+		-svme 1 \
+		-encrypted_page 1 \
+		-pvalidate_opt 0 \
+		-acpi_dir igvm/acpi/acpi-clh/2 \
+```
 
 
 ## Tests
