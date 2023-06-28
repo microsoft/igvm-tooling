@@ -163,6 +163,12 @@ def main(argv=None):
         default=True,
         help="Expose support for SVME"
     )
+    parser.add_argument(
+        '-svn',
+        type=str,
+        help="VMGS file SVN",
+        metavar='0'
+    )
 
     args = parser.parse_args(argv)
 
@@ -175,7 +181,10 @@ def main(argv=None):
         args.o.write(rawbytes)
         if args.measurement_file:
              with args.measurement_file as f:
-                info = {"sevsnpvm-launchmeasurement": measurement}
+                info = {
+                    "x-ms-sevsnpvm-guestsvn": args.svn,
+                    "x-ms-sevsnpvm-launchmeasurement": measurement,
+                }
                 print(info)
                 json.dump(info, f, indent=2)
     else:
