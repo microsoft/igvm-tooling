@@ -167,7 +167,7 @@ def main(argv=None):
         '-svn',
         type=str,
         help="VMGS file SVN",
-        metavar='0'
+        default='0'
     )
 
     args = parser.parse_args(argv)
