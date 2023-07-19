@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 # -*- coding: utf-8 -*-
 #
 # TARGET arch is: ['-I/root/cvm/linux/arch/x86/include', '-DC_ASSERT(x)=', '-I/root/cvm/linux/include', '-DC_ASSERT(x)=', '-I/root/cvm/linux/', '-DC_ASSERT(x)=']

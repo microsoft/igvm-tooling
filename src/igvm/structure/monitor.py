@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 # -*- coding: utf-8 -*-
 #
 # TARGET arch is: ['-I/root/snp/igvm/igvm/../../snp-sm/arch/x86/include', '-DC_ASSERT(x)=', '-D__packed=', '-Du32=uint32_t', '-DUINT32=int', '-DUINT64=long', '-DUINT16=short', '-DUINT8=char', '-I/root/snp/igvm/igvm/../../snp-sm/include', '-DC_ASSERT(x)=', '-D__packed=', '-Du32=uint32_t', '-DUINT32=int', '-DUINT64=long', '-DUINT16=short', '-DUINT8=char', '-I/root/snp/igvm/igvm/../../snp-sm/', '-DC_ASSERT(x)=', '-D__packed=', '-Du32=uint32_t', '-DUINT32=int', '-DUINT64=long', '-DUINT16=short', '-DUINT8=char']

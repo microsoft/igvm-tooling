@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 from ctypes import *
 from cached_property import cached_property
 from ecdsa import SigningKey, NIST384p

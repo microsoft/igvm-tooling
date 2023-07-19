@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 import unittest
 from unittest.mock import MagicMock, patch
 from igvm.vmstate import ARCH, Arch

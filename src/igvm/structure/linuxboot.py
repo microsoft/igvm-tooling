@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 # -*- coding: utf-8 -*-
 #
 # TARGET arch is: ['-I/home/mchamarthy/work/LSG-linux-rolling/arch/x86/include', '-DC_ASSERT(x)=', '-D__packed=', '-Du32=uint32_t', '-DUINT32=int', '-DUINT64=long', '-DUINT16=short', '-DUINT8=char', '-D__no_sanitize_or_inline=', '-D__no_kasan_or_inline=', '-D__attribute_const__=', '-Dpgd_t=int', '-D__init=', '-I/home/mchamarthy/work/LSG-linux-rolling/include', '-DC_ASSERT(x)=', '-D__packed=', '-Du32=uint32_t', '-DUINT32=int', '-DUINT64=long', '-DUINT16=short', '-DUINT8=char', '-D__no_sanitize_or_inline=', '-D__no_kasan_or_inline=', '-D__attribute_const__=', '-Dpgd_t=int', '-D__init=', '-I/home/mchamarthy/work/LSG-linux-rolling/include/asm-generic', '-DC_ASSERT(x)=', '-D__packed=', '-Du32=uint32_t', '-DUINT32=int', '-DUINT64=long', '-DUINT16=short', '-DUINT8=char', '-D__no_sanitize_or_inline=', '-D__no_kasan_or_inline=', '-D__attribute_const__=', '-Dpgd_t=int', '-D__init=', '-I/home/mchamarthy/work/LSG-linux-rolling/', '-DC_ASSERT(x)=', '-D__packed=', '-Du32=uint32_t', '-DUINT32=int', '-DUINT64=long', '-DUINT16=short', '-DUINT8=char', '-D__no_sanitize_or_inline=', '-D__no_kasan_or_inline=', '-D__attribute_const__=', '-Dpgd_t=int', '-D__init=']
