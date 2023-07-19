@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name="msigvm",
-    version="2.3.2",
+    version="1.0.0",
     description="msigvm - Microsoft IGVM format",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
