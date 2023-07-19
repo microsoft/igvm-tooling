@@ -65,9 +65,7 @@ So that we do not need to include memory pages for data section in IGVM image.
 
 ## Supported Images
 
-* SNP enlightened: https://github.com/wdcui/linux (public), https://github.com/MSRSSP/snplinux
-* SNP vmpl0 as security monitor: https://github.com/MSRSSP/snp-sm
-* [ongoing] verified SNP monitor: https://github.com/MSRSSP/verus-snp-sm
+* SNP enlightened: https://github.com/wdcui/linux
 
 ## Cloud Hypervisor support
 We may use the same tool to create IGVM files that [Cloud Hypervisor](https://www.cloudhypervisor.org/) VMM can use to load a confidential guest.
