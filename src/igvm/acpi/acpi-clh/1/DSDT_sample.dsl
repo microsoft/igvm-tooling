@@ -30,13 +30,13 @@ DefinitionBlock ("", "DSDT", 6, "CLOUDH", "CHDSDT  ", 0x00000001)
         {
             QWordMemory (ResourceProducer, PosDecode, MinFixed, MaxFixed, NonCacheable, ReadWrite,
                 0x0000000000000000, // Granularity
-                0x00003FFFFFFEF000, // Range Minimum
-                0x00003FFFFFFEF00F, // Range Maximum
+                0x000007FFFFFEF000, // Range Minimum
+                0x000007FFFFFEF00F, // Range Maximum
                 0x0000000000000000, // Translation Offset
                 0x0000000000000010, // Length
                 ,, , AddressRangeMemory, TypeStatic)
         })
-        OperationRegion (PCST, SystemMemory, 0x00003FFFFFFEF000, 0x10)
+        OperationRegion (PCST, SystemMemory, 0x000007FFFFFEF000, 0x10)
         Field (PCST, DWordAcc, NoLock, WriteAsZeros)
         {
             PCIU,   32, 
@@ -977,13 +977,13 @@ DefinitionBlock ("", "DSDT", 6, "CLOUDH", "CHDSDT  ", 0x00000001)
         {
             QWordMemory (ResourceProducer, PosDecode, MinFixed, MaxFixed, NonCacheable, ReadWrite,
                 0x0000000000000000, // Granularity
-                0x00003FFFFFFED000, // Range Minimum
-                0x00003FFFFFFED000, // Range Maximum
+                0x000007FFFFFED000, // Range Minimum
+                0x000007FFFFFED000, // Range Maximum
                 0x0000000000000000, // Translation Offset
                 0x0000000000000001, // Length
                 ,, , AddressRangeMemory, TypeStatic)
         })
-        OperationRegion (GDST, SystemMemory, 0x00003FFFFFFED000, 0x01)
+        OperationRegion (GDST, SystemMemory, 0x000007FFFFFED000, 0x01)
         Field (GDST, ByteAcc, NoLock, WriteAsZeros)
         {
             GDAT,   8
