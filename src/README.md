@@ -69,11 +69,10 @@ So that we do not need to include memory pages for data section in IGVM image.
 
 ## Cloud Hypervisor support
 We may use the same tool to create IGVM files that [Cloud Hypervisor](https://www.cloudhypervisor.org/) VMM can use to load a confidential guest.
-The default set of ACPI tables do not function when using this programme to generate IGVM files for Cloud Hypervisor, thus you must pick one of
-the folders under 'igvm/acpi/acpi-clh'. There are several folders under 'igvm/acpi/acpi-clh', and the name of the folder represents the number
-of CPUs you want the guest to boot with. Here is a sample command that you could use to generate an IGVM file for a guest with 2 vcpus:
+The default set of ACPI tables do not function when using this programme to generate IGVM files for Cloud Hypervisor, thus you must select
+'igvm/acpi/acpi-clh' as ACPI table directory.
 
-```
+```sh
 $(IGVMGEN) -o $(OUTPUT) \
 		-kernel $(LINUX)/arch/x86/boot/bzImage \
 		-append "$(CMDLINE)" \
@@ -83,7 +82,7 @@ $(IGVMGEN) -o $(OUTPUT) \
 		-svme 1 \
 		-encrypted_page 1 \
 		-pvalidate_opt 0 \
-		-acpi_dir igvm/acpi/acpi-clh/2 \
+		-acpi_dir igvm/acpi/acpi-clh \
 ```
 
 
