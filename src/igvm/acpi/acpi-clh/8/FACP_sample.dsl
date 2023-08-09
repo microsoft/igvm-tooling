@@ -2,8 +2,8 @@
  * Intel ACPI Component Architecture
  * AML/ASL+ Disassembler version 20190509 (64-bit version)
  * Copyright (c) 2000 - 2019 Intel Corporation
- * 
- * Disassembly of acpi_table/test/FACP_sample.dat, Tue Feb  1 13:42:43 2022
+ *
+ * Disassembly of facp.dat, Fri Jun  9 08:54:48 2023
  *
  * ACPI Data Table [FACP]
  *
@@ -13,18 +13,18 @@
 [000h 0000   4]                    Signature : "FACP"    [Fixed ACPI Description Table (FADT)]
 [004h 0004   4]                 Table Length : 00000114
 [008h 0008   1]                     Revision : 06
-[009h 0009   1]                     Checksum : 6C
-[00Ah 0010   6]                       Oem ID : "VRTUAL"
-[010h 0016   8]                 Oem Table ID : "MICROSFT"
+[009h 0009   1]                     Checksum : D6
+[00Ah 0010   6]                       Oem ID : "CLOUDH"
+[010h 0016   8]                 Oem Table ID : "CHFACP  "
 [018h 0024   4]                 Oem Revision : 00000001
-[01Ch 0028   4]              Asl Compiler ID : "MSFT"
-[020h 0032   4]        Asl Compiler Revision : 00000001
+[01Ch 0028   4]              Asl Compiler ID : "RVAT"
+[020h 0032   4]        Asl Compiler Revision : 01000000
 
 [024h 0036   4]                 FACS Address : 0
 [028h 0040   4]                 DSDT Address : 0
-[02Ch 0044   1]                        Model : 01
+[02Ch 0044   1]                        Model : 00
 [02Dh 0045   1]                   PM Profile : 00 [Unspecified]
-[02Eh 0046   2]                SCI Interrupt : 0009
+[02Eh 0046   2]                SCI Interrupt : 0000
 [030h 0048   4]             SMI Command Port : 00000000
 [034h 0052   1]            ACPI Enable Value : 00
 [035h 0053   1]           ACPI Disable Value : 00
@@ -38,40 +38,40 @@
 [04Ch 0076   4]       PM Timer Block Address : 00000000
 [050h 0080   4]           GPE0 Block Address : 00000000
 [054h 0084   4]           GPE1 Block Address : 00000000
-[058h 0088   1]       PM1 Event Block Length : 04
-[059h 0089   1]     PM1 Control Block Length : 02
+[058h 0088   1]       PM1 Event Block Length : 00
+[059h 0089   1]     PM1 Control Block Length : 00
 [05Ah 0090   1]     PM2 Control Block Length : 00
-[05Bh 0091   1]        PM Timer Block Length : 04
-[05Ch 0092   1]            GPE0 Block Length : 04
+[05Bh 0091   1]        PM Timer Block Length : 00
+[05Ch 0092   1]            GPE0 Block Length : 00
 [05Dh 0093   1]            GPE1 Block Length : 00
 [05Eh 0094   1]             GPE1 Base Offset : 00
 [05Fh 0095   1]                 _CST Support : 00
-[060h 0096   2]                   C2 Latency : 0065
-[062h 0098   2]                   C3 Latency : 03E9
+[060h 0096   2]                   C2 Latency : 0000
+[062h 0098   2]                   C3 Latency : 0000
 [064h 0100   2]               CPU Cache Size : 0000
 [066h 0102   2]           Cache Flush Stride : 0000
 [068h 0104   1]            Duty Cycle Offset : 00
 [069h 0105   1]             Duty Cycle Width : 00
-[06Ah 0106   1]          RTC Day Alarm Index : 0D
+[06Ah 0106   1]          RTC Day Alarm Index : 00
 [06Bh 0107   1]        RTC Month Alarm Index : 00
 [06Ch 0108   1]            RTC Century Index : 00
-[06Dh 0109   2]   Boot Flags (decoded below) : 0004
+[06Dh 0109   2]   Boot Flags (decoded below) : 0000
                Legacy Devices Supported (V2) : 0
             8042 Present on ports 60/64 (V2) : 0
-                        VGA Not Present (V4) : 1
+                        VGA Not Present (V4) : 0
                       MSI Not Supported (V4) : 0
                 PCIe ASPM Not Supported (V4) : 0
                    CMOS RTC Not Present (V5) : 0
 [06Fh 0111   1]                     Reserved : 00
-[070h 0112   4]        Flags (decoded below) : 001085B5
-      WBINVD instruction is operational (V1) : 1
+[070h 0112   4]        Flags (decoded below) : 00100500
+      WBINVD instruction is operational (V1) : 0
               WBINVD flushes all caches (V1) : 0
-                    All CPUs support C1 (V1) : 1
+                    All CPUs support C1 (V1) : 0
                   C2 works on MP system (V1) : 0
-            Control Method Power Button (V1) : 1
-            Control Method Sleep Button (V1) : 1
+            Control Method Power Button (V1) : 0
+            Control Method Sleep Button (V1) : 0
         RTC wake not in fixed reg space (V1) : 0
-            RTC can wake system from S4 (V1) : 1
+            RTC can wake system from S4 (V1) : 0
                         32-bit PM Timer (V1) : 1
                       Docking Supported (V1) : 0
                Reset Register Supported (V2) : 1
@@ -79,7 +79,7 @@
                     Headless - No Video (V3) : 0
         Use native instr after SLP_TYPx (V3) : 0
               PCIEXP_WAK Bits Supported (V4) : 0
-                     Use Platform Timer (V4) : 1
+                     Use Platform Timer (V4) : 0
                RTC_STS valid on S4 wake (V4) : 0
                 Remote Power-on capable (V4) : 0
                  Use APIC Cluster Model (V4) : 0
@@ -92,22 +92,22 @@
 [075h 0117   1]                    Bit Width : 08
 [076h 0118   1]                   Bit Offset : 00
 [077h 0119   1]         Encoded Access Width : 01 [Byte Access:8]
-[078h 0120   8]                      Address : 0000000000000433
+[078h 0120   8]                      Address : 0000000000000600
 
 [080h 0128   1]         Value to cause reset : 01
 [081h 0129   2]    ARM Flags (decoded below) : 0000
                               PSCI Compliant : 0
                        Must use HVC for PSCI : 0
 
-[083h 0131   1]          FADT Minor Revision : 02
+[083h 0131   1]          FADT Minor Revision : 03
 [084h 0132   8]                 FACS Address : 0
 [08Ch 0140   8]                 DSDT Address : 0
 [094h 0148  12]             PM1A Event Block : [Generic Address Structure]
-[094h 0148   1]                     Space ID : 01 [SystemIO]
-[095h 0149   1]                    Bit Width : 20
+[094h 0148   1]                     Space ID : 00 [SystemMemory]
+[095h 0149   1]                    Bit Width : 00
 [096h 0150   1]                   Bit Offset : 00
-[097h 0151   1]         Encoded Access Width : 04 [QWord Access:64]
-[098h 0152   8]                      Address : 0000000000000400
+[097h 0151   1]         Encoded Access Width : 00 [Undefined/Legacy]
+[098h 0152   8]                      Address : 0000000000000000
 
 [0A0h 0160  12]             PM1B Event Block : [Generic Address Structure]
 [0A0h 0160   1]                     Space ID : 00 [SystemMemory]
@@ -117,11 +117,11 @@
 [0A4h 0164   8]                      Address : 0000000000000000
 
 [0ACh 0172  12]           PM1A Control Block : [Generic Address Structure]
-[0ACh 0172   1]                     Space ID : 01 [SystemIO]
-[0ADh 0173   1]                    Bit Width : 10
+[0ACh 0172   1]                     Space ID : 00 [SystemMemory]
+[0ADh 0173   1]                    Bit Width : 00
 [0AEh 0174   1]                   Bit Offset : 00
-[0AFh 0175   1]         Encoded Access Width : 02 [Word Access:16]
-[0B0h 0176   8]                      Address : 0000000000000404
+[0AFh 0175   1]         Encoded Access Width : 00 [Undefined/Legacy]
+[0B0h 0176   8]                      Address : 0000000000000000
 
 [0B8h 0184  12]           PM1B Control Block : [Generic Address Structure]
 [0B8h 0184   1]                     Space ID : 00 [SystemMemory]
@@ -145,11 +145,11 @@
 [0D4h 0212   8]                      Address : 0000000000000608
 
 [0DCh 0220  12]                   GPE0 Block : [Generic Address Structure]
-[0DCh 0220   1]                     Space ID : 01 [SystemIO]
-[0DDh 0221   1]                    Bit Width : 20
+[0DCh 0220   1]                     Space ID : 00 [SystemMemory]
+[0DDh 0221   1]                    Bit Width : 00
 [0DEh 0222   1]                   Bit Offset : 00
-[0DFh 0223   1]         Encoded Access Width : 04 [QWord Access:64]
-[0E0h 0224   8]                      Address : 000000000000040C
+[0DFh 0223   1]         Encoded Access Width : 00 [Undefined/Legacy]
+[0E0h 0224   8]                      Address : 0000000000000000
 
 [0E8h 0232  12]                   GPE1 Block : [Generic Address Structure]
 [0E8h 0232   1]                     Space ID : 00 [SystemMemory]
@@ -160,38 +160,38 @@
 
 
 [0F4h 0244  12]       Sleep Control Register : [Generic Address Structure]
-[0F4h 0244   1]                     Space ID : 00 [SystemMemory]
-[0F5h 0245   1]                    Bit Width : 00
+[0F4h 0244   1]                     Space ID : 01 [SystemIO]
+[0F5h 0245   1]                    Bit Width : 08
 [0F6h 0246   1]                   Bit Offset : 00
-[0F7h 0247   1]         Encoded Access Width : 00 [Undefined/Legacy]
-[0F8h 0248   8]                      Address : 0000000000000000
+[0F7h 0247   1]         Encoded Access Width : 01 [Byte Access:8]
+[0F8h 0248   8]                      Address : 0000000000000600
 
 [100h 0256  12]        Sleep Status Register : [Generic Address Structure]
-[100h 0256   1]                     Space ID : 00 [SystemMemory]
-[101h 0257   1]                    Bit Width : 00
+[100h 0256   1]                     Space ID : 01 [SystemIO]
+[101h 0257   1]                    Bit Width : 08
 [102h 0258   1]                   Bit Offset : 00
-[103h 0259   1]         Encoded Access Width : 00 [Undefined/Legacy]
-[104h 0260   8]                      Address : 0000000000000000
+[103h 0259   1]         Encoded Access Width : 01 [Byte Access:8]
+[104h 0260   8]                      Address : 0000000000000600
 
-[10Ch 0268   8]                Hypervisor ID : 567265707948734D
+[10Ch 0268   8]                Hypervisor ID : 50594844554F4C43
 
 Raw Table Data: Length 276 (0x114)
 
-    0000: 46 41 43 50 14 01 00 00 06 6C 56 52 54 55 41 4C  // FACP.....lVRTUAL
-    0010: 4D 49 43 52 4F 53 46 54 01 00 00 00 4D 53 46 54  // MICROSFT....MSFT
-    0020: 01 00 00 00 00 00 00 00 00 00 00 00 01 00 09 00  // ................
+    0000: 46 41 43 50 14 01 00 00 06 D6 43 4C 4F 55 44 48  // FACP......CLOUDH
+    0010: 43 48 46 41 43 50 20 20 01 00 00 00 52 56 41 54  // CHFACP  ....RVAT
+    0020: 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 00  // ................
     0030: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
     0040: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
-    0050: 00 00 00 00 00 00 00 00 04 02 00 04 04 00 00 00  // ................
-    0060: 65 00 E9 03 00 00 00 00 00 00 0D 00 00 04 00 00  // e...............
-    0070: B5 85 10 00 01 08 00 01 33 04 00 00 00 00 00 00  // ........3.......
-    0080: 01 00 00 02 14 11 10 00 00 00 00 00 B8 11 10 00  // ................
-    0090: 00 00 00 00 01 20 00 04 00 04 00 00 00 00 00 00  // ..... ..........
-    00A0: 00 00 00 00 00 00 00 00 00 00 00 00 01 10 00 02  // ................
-    00B0: 04 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
+    0050: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
+    0060: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
+    0070: 00 05 10 00 01 08 00 01 00 06 00 00 00 00 00 00  // ................
+    0080: 01 00 00 03 00 00 00 00 00 00 00 00 24 00 0A 00  // ............$...
+    0090: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
+    00A0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
+    00B0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
     00C0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
-    00D0: 01 20 00 04 08 04 00 00 00 00 00 00 01 20 00 04  // . ........... ..
-    00E0: 0C 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
-    00F0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
-    0100: 00 00 00 00 00 00 00 00 00 00 00 00 4D 73 48 79  // ............MsHy
-    0110: 70 65 72 56                                      // perV
+    00D0: 01 20 00 04 08 06 00 00 00 00 00 00 00 00 00 00  // . ..............
+    00E0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  // ................
+    00F0: 00 00 00 00 01 08 00 01 00 06 00 00 00 00 00 00  // ................
+    0100: 01 08 00 01 00 06 00 00 00 00 00 00 43 4C 4F 55  // ............CLOU
+    0110: 44 48 59 50                                      // DHYP
