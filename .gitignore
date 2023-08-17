@@ -130,6 +130,6 @@ dmypy.json
 src/igvm/acpi/acpi-test/*.aml
 src/igvm/acpi/acpi-test-aml
 src/igvm/acpi/acpi-test-new
-src/igvm/acpi/acpi-clh/*-new
-src/igvm/acpi/acpi-clh/*/*.aml
+src/igvm/acpi/acpi-clh-new
+src/igvm/acpi/acpi-clh/*.aml
 .vscode
