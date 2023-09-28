@@ -200,11 +200,13 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
         kernel_base = self._header.pref_address
         self.state.seek(kernel_base)
         if self._use_pvalidate_opt:
+            print("load_code: use pvalidate optsize=%x" % self.vmlinux_size)
             logging.debug("_use_pvalidate_opt")
             self.state.memory.allocate(self.vmlinux_size)
             logging.debug("kernel end = %x" % (self.state.memory.allocate(0)))
             self._setup_mem_for32()
         else:
+            print("load_code: !use pvalidate opt size=%x" % self.kernel_needed_mem)
             self.state.memory.allocate(self.kernel_needed_mem)
         self.state.memory.write(kernel_base, self.vmlinux_bin)
 
@@ -253,8 +255,10 @@ class IGVMLinuxGenerator(IGVMBaseGenerator):
 
         # give 1GB to the kernel
         if not self._use_pvalidate_opt:
+            print("not use pvalidate opt")
             params.e820_entries = self._setup_e820(params.e820_table)
         else:
+            print("use pvalidate opt")
             params.e820_entries = self._setup_e820_opt(params.e820_table)
 
         del cc_blob
