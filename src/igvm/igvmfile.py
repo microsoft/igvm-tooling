@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 
 from ctypes import *
+import zlib
 from cached_property import cached_property
 from ecdsa import SigningKey, NIST384p
 from hashlib import sha384
@@ -376,6 +377,17 @@ class IGVMHeaders:
             total_offset += PGSIZE
         self.headers[0].TotalFileSize = total_offset
 
+    def update_crc32_checksum(self):
+        out = bytearray()
+        for h in self.headers:
+            size = sizeof(h)
+            # IGVM parser assumes the header is aligned by 8
+            aligned_size = ((size + 7) >> 3) << 3
+            out.extend(bytes(h))
+            out.extend(b'0'*(aligned_size-size))
+
+        self.headers[0].Checksum = zlib.crc32(out)
+
     def nonempty_page_header_iter(self):
         for h in self.headers:
             if hasattr(h, 'GPA') and hasattr(h, 'FileOffset') and h.FileOffset:
@@ -597,6 +609,7 @@ class IGVMFile(VMState):
         igvm_headers.add_id_block_raw(
             self.gen_id_block(igvm_headers.curr_digest))
         igvm_headers.setup_file_offset()
+        igvm_headers.update_crc32_checksum()
         # Assemble the IGVM file
         body = bytearray()
         for h in igvm_headers.nonempty_page_header_iter():
