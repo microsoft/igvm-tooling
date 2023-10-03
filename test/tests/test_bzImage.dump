@@ -1,4 +1,4 @@
-{ Magic:0x4d564749 FormatVersion:0x1 VariableHeaderOffset:0x18 VariableHeaderSize:0x1580 TotalFileSize:0x27598 Checksum:0x0 }
+{ Magic:0x4d564749 FormatVersion:0x1 VariableHeaderOffset:0x18 VariableHeaderSize:0x1580 TotalFileSize:0x27598 Checksum:0x4db92e6 }
 IGVM_VHT_SUPPORTED_PLATFORM(18){ CompatibilityMask:0x1 HighestVtl:0x2 PlatformType:0x2 PlatformVersion:0x1 SharedGPABoundary:0x0 }
 IGVM_VHT_SNP_POLICY(30){ Policy:0x3001f CompatibilityMask:0x1 Reserved:0x0 }
 IGVM_VHT_PAGE_DATA(48){ GPA:0xa0000 CompatibilityMask:0x1 FileOffset:0x0 Flags:0x0 DataType:0x0 Reserved:0x0 }
