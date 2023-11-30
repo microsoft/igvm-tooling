@@ -8727,20 +8727,6 @@ DefinitionBlock ("", "DSDT", 6, "CLOUDH", "CHDSDT  ", 0x00000001)
                 Notify (C000, Arg1)
             }
 
-            If ((Arg0 == One))
-            {
-                Notify (C001, Arg1)
-            }
-
-            If ((Arg0 == 0x02))
-            {
-                Notify (C002, Arg1)
-            }
-
-            If ((Arg0 == 0x03))
-            {
-                Notify (C003, Arg1)
-            }
         }
 
         Method (CEJ0, 1, Serialized)
@@ -8755,7 +8741,7 @@ DefinitionBlock ("", "DSDT", 6, "CLOUDH", "CHDSDT  ", 0x00000001)
         {
             Acquire (\_SB.PRES.CPLK, 0xFFFF)
             Local0 = Zero
-            While ((Local0 < 0x04))
+            While ((Local0 < 0x01))
             {
                 \_SB.PRES.CSEL = Local0
                 If ((\_SB.PRES.CINS == One))
@@ -8797,78 +8783,6 @@ DefinitionBlock ("", "DSDT", 6, "CLOUDH", "CHDSDT  ", 0x00000001)
             Method (_EJ0, 1, NotSerialized)  // _EJx: Eject Device, x=0-9
             {
                 CEJ0 (Zero)
-            }
-        }
-
-        Device (C001)
-        {
-            Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, One)  // _UID: Unique ID
-            Method (_STA, 0, NotSerialized)  // _STA: Status
-            {
-                Return (CSTA (One))
-            }
-
-            Method (_PXM, 0, NotSerialized)  // _PXM: Device Proximity
-            {
-                Return (Zero)
-            }
-
-            Name (_MAT, Buffer (0x08)  // _MAT: Multiple APIC Table Entry
-            {
-                 0x00, 0x08, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00   // ........
-            })
-            Method (_EJ0, 1, NotSerialized)  // _EJx: Eject Device, x=0-9
-            {
-                CEJ0 (One)
-            }
-        }
-
-        Device (C002)
-        {
-            Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, 0x02)  // _UID: Unique ID
-            Method (_STA, 0, NotSerialized)  // _STA: Status
-            {
-                Return (CSTA (0x02))
-            }
-
-            Method (_PXM, 0, NotSerialized)  // _PXM: Device Proximity
-            {
-                Return (Zero)
-            }
-
-            Name (_MAT, Buffer (0x08)  // _MAT: Multiple APIC Table Entry
-            {
-                 0x00, 0x08, 0x02, 0x02, 0x01, 0x00, 0x00, 0x00   // ........
-            })
-            Method (_EJ0, 1, NotSerialized)  // _EJx: Eject Device, x=0-9
-            {
-                CEJ0 (0x02)
-            }
-        }
-
-        Device (C003)
-        {
-            Name (_HID, "ACPI0007" /* Processor Device */)  // _HID: Hardware ID
-            Name (_UID, 0x03)  // _UID: Unique ID
-            Method (_STA, 0, NotSerialized)  // _STA: Status
-            {
-                Return (CSTA (0x03))
-            }
-
-            Method (_PXM, 0, NotSerialized)  // _PXM: Device Proximity
-            {
-                Return (Zero)
-            }
-
-            Name (_MAT, Buffer (0x08)  // _MAT: Multiple APIC Table Entry
-            {
-                 0x00, 0x08, 0x03, 0x03, 0x01, 0x00, 0x00, 0x00   // ........
-            })
-            Method (_EJ0, 1, NotSerialized)  // _EJx: Eject Device, x=0-9
-            {
-                CEJ0 (0x03)
             }
         }
     }
