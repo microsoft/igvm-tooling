@@ -18,7 +18,4 @@ steps:
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
 
-# test this too
-
-
-# another test
+# test this too # plus another test
