@@ -1,0 +1,58 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+- script: |
+    echo Add other tasks to build, test, and deploy your project.
+    echo See https://aka.ms/yaml
+  displayName: 'Run a multi-line script'
+  trigger: none
+
+resources:
+  containers:
+  - container: pmc-cli # Use the pmc-cli container image, which has tools/dependencies for publishing
+    image: 'mcr.microsoft.com/pmc/pmc-cli:latest'
+    options: --entrypoint=""
+
+jobs:
+- job: PublishPackage
+  pool:
+    vmImage: 'ubuntu-latest' # Use a generic ADO pool, with the pmc-cli container
+  container: pmc-cli
+
+  steps:
+  - task: AzureKeyVault@2 # Fetch your publishing certificate from KeyVault
+    inputs:
+      azureSubscription: 'YOUR_SUBSCRIPTION_NAME'
+      KeyVaultName: 'YOUR_KEYVAULT_NAME'
+      SecretsFilter: 'YOUR_SECRETS_FILTER_NAME'
+      RunAsPreJob: false
+
+  - task: DownloadPipelineArtifact@2 # Download your debs/rpms from your build pipeline
+    inputs:
+      buildType: 'specific'
+      project: 'b32aa71e-8ed2-41b2-9d77-5bc261222004' # This example is msazure/One
+      definition: '0000' # use the ID that's present in the URL for your build pipeline
+      buildVersionToDownload: 'latest'
+      targetPath: '$(System.ArtifactsDirectory)'
+
+  - task: PublishLinuxPackagesPMC@0
+    inputs:
+      profile: 'prod' # or tux-dev or ppe depending on what you selected
+      msal_SNIAuth: 'msal-sniauth' # Or 'no-msal-sniauth'
+      msal_cert: $(YOUR_SECRETS_FILTER_NAME) # notice: no single quotation marks
+      msal_client_ID: 'YOUR_MSAL_CLIENT_ID'
+      package_path: '$(System.ArtifactsDirectory)/...' # Path to build artifacts
+      repository: 'YOUR_REPO_NAME_OR_ID'
+      release: 'YOUR_REPO_RELEASE_NAME' # Required for debs, leave blank for rpms
