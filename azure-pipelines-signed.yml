@@ -4,10 +4,10 @@
 # https://aka.ms/yaml
 
 trigger:
-- main
+- None
 
 pool:
-  vmImage: 'ubuntu-latest' # Use a generic ADO pool, with the pmc-cli container
+  vmImage: 'ubuntu-20.04' # Use a generic ADO pool, with the pmc-cli container
 
 steps:
 - script: |
@@ -20,8 +20,8 @@ steps:
     # Recommended but not required: `pigz` for faster compression operations.
     sudo apt -y install pigz
 
-    # Fix go 1.17 link
-    sudo ln -vsf /usr/lib/go-1.17/bin/go /usr/bin/go
+    # Fix go 1.20 link
+    sudo ln -vsf /usr/lib/go-1.20/bin/go /usr/bin/go
 
     # Install Docker
     curl -fsSL https://get.docker.com -o get-docker.sh
@@ -29,19 +29,25 @@ steps:
     sudo usermod -aG docker $USER
   displayName: "Install Dependencies"
   
+- script: |
+    git clone https://github.com/microsoft/CBL-Mariner.git
+    pushd CBL-Mariner/toolkit
+    git checkout 2.0-stable
+    sudo make package-toolkit REBUILD_TOOLS=y
+    popd
+  displayName: 'Clone CBL-Mariner and build toolkit'
 
-- task: DownloadPipelineArtifact@2 # Download your debs/rpms from your build pipeline
-  inputs:
-    buildType: 'specific'
-    project: 'b32aa71e-8ed2-41b2-9d77-5bc261222004' # This example is msazure/One
-    definition: '0000' # use the ID that's present in the URL for your build pipeline
-    buildVersionToDownload: 'latest'
-    targetPath: '$(System.ArtifactsDirectory)'
+- script: |
+    git clone https://github.com/microsoft/CBL-MarinerTutorials.git
+    pushd CBL-MarinerTutorials
+    cp ../CBL-Mariner/out/toolkit-*.tar.gz ./
+    tar -xzvf toolkit-*.tar.gz
+  displayName: 'Clone CBL-MarinerTutorials and copy toolkit built from previous step'
 
 - task: EsrpCodeSigning@4
   inputs:
     ConnectedServiceName: 'ESRP Code Signing Conn'
-    FolderPath: 'src\myapp\$(BuildConfiguration)\Release'
+    FolderPath: '$(System.ArtifactsDirectory)'
     Pattern: '*.rpm,*.deb'
     signConfigType: 'inlineSignParams'
     inlineOperation: |
