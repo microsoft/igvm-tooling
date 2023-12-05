@@ -21,8 +21,8 @@ jobs:
   steps:
   - task: AzureKeyVault@2 # Fetch your publishing certificate from KeyVault
     inputs:
-      azureSubscription: 'YOUR_SUBSCRIPTION_NAME'
-      KeyVaultName: 'YOUR_KEYVAULT_NAME'
+      azureSubscription: 'Azure Confidential Computing DEV AND TEST'
+      KeyVaultName: 'pmc-kv-acceurope'
       SecretsFilter: 'YOUR_SECRETS_FILTER_NAME'
       RunAsPreJob: false
 
@@ -34,33 +34,33 @@ jobs:
       buildVersionToDownload: 'latest'
       targetPath: '$(System.ArtifactsDirectory)'
 
-  - task: PublishLinuxPackagesPMC@0
+  - task: EsrpCodeSigning@4
     inputs:
-      profile: 'prod' # or tux-dev or ppe depending on what you selected
-      msal_SNIAuth: 'msal-sniauth' # Or 'no-msal-sniauth'
-      msal_cert: $(YOUR_SECRETS_FILTER_NAME) # notice: no single quotation marks
-      msal_client_ID: 'YOUR_MSAL_CLIENT_ID'
-      package_path: '$(System.ArtifactsDirectory)/...' # Path to build artifacts
-      repository: 'YOUR_REPO_NAME_OR_ID'
-      release: 'YOUR_REPO_RELEASE_NAME' # Required for debs, leave blank for rpms
-
-  - task: EsrpCodeSigning@3
-    displayName: Sign
-    inputs:
-      ConnectedServiceName: 'YOUR-SERVICE-CONNECTION'
-      FolderPath: '$(Build.SourcesDirectory)/'
-      Pattern: '*.deb,*.rpm'
+      ConnectedServiceName: 'ESRP Code Signing Conn'
+      FolderPath: 'src\myapp\$(BuildConfiguration)\Release'
+      Pattern: '*.rpm,*.deb'
       signConfigType: 'inlineSignParams'
       inlineOperation: |
         [
-          {
-            "keyCode": "CP-450779-Pgp",
-            "operationSetCode": "LinuxSign",
-            "parameters": [],
-            "toolName": "signtool.exe",
-            "toolVersion": "1.0"
-          }
+        {
+          "KeyCode": "CP-459159-Pgp",
+          "OperationCode": "LinuxSign",
+          "ToolName": "sign",
+          "ToolVersion": "1.0",
+          "Parameters": {}
+        }
         ]
       SessionTimeout: '60'
       MaxConcurrency: '50'
       MaxRetryAttempts: '5'
+      PendingAnalysisWaitTimeoutMinutes: '5'
+      
+  - task: PublishLinuxPackagesPMC@0
+    inputs:
+      profile: 'prod'
+      msal_SNIAuth: 'msal-sniauth'
+      msal_cert: '$(YOUR_SECRETS_FILTER_NAME)'
+      msal_client_ID: 'YOUR_MSAL_CLIENT_ID'
+      package_path: '$(System.ArtifactsDirectory)/...'
+      repository: 'YOUR_REPO_NAME_OR_ID'
+      release: 'YOUR_REPO_RELEASE_NAME'
