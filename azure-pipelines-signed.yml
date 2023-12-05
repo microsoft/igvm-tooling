@@ -6,61 +6,59 @@
 trigger:
 - main
 
-resources:
-  containers:
-  - container: pmc-cli # Use the pmc-cli container image, which has tools/dependencies for publishing
-    image: 'mcr.microsoft.com/pmc/pmc-cli:latest'
-    options: --entrypoint=""
+pool:
+  vmImage: 'ubuntu-latest' # Use a generic ADO pool, with the pmc-cli container
 
-jobs:
-- job: PublishPackage
-  pool:
-    vmImage: 'ubuntu-latest' # Use a generic ADO pool, with the pmc-cli container
-  container: pmc-cli
+steps:
+- script: |
+    sudo add-apt-repository ppa:longsleep/golang-backports
+    sudo apt-get update
 
-  steps:
-  - task: AzureKeyVault@2 # Fetch your publishing certificate from KeyVault
-    inputs:
-      azureSubscription: 'Azure Confidential Computing DEV AND TEST'
-      KeyVaultName: 'pmc-kv-acceurope'
-      SecretsFilter: 'YOUR_SECRETS_FILTER_NAME'
-      RunAsPreJob: false
+    # Install required dependencies.
+    sudo apt -y install git make tar wget curl rpm qemu-utils golang-1.20-go genisoimage python bison gawk
 
-  - task: DownloadPipelineArtifact@2 # Download your debs/rpms from your build pipeline
-    inputs:
-      buildType: 'specific'
-      project: 'b32aa71e-8ed2-41b2-9d77-5bc261222004' # This example is msazure/One
-      definition: '0000' # use the ID that's present in the URL for your build pipeline
-      buildVersionToDownload: 'latest'
-      targetPath: '$(System.ArtifactsDirectory)'
+    # Recommended but not required: `pigz` for faster compression operations.
+    sudo apt -y install pigz
 
-  - task: EsrpCodeSigning@4
-    inputs:
-      ConnectedServiceName: 'ESRP Code Signing Conn'
-      FolderPath: 'src\myapp\$(BuildConfiguration)\Release'
-      Pattern: '*.rpm,*.deb'
-      signConfigType: 'inlineSignParams'
-      inlineOperation: |
-        [
-        {
-          "KeyCode": "CP-459159-Pgp",
-          "OperationCode": "LinuxSign",
-          "ToolName": "sign",
-          "ToolVersion": "1.0",
-          "Parameters": {}
-        }
-        ]
-      SessionTimeout: '60'
-      MaxConcurrency: '50'
-      MaxRetryAttempts: '5'
-      PendingAnalysisWaitTimeoutMinutes: '5'
-      
-  - task: PublishLinuxPackagesPMC@0
-    inputs:
-      profile: 'prod'
-      msal_SNIAuth: 'msal-sniauth'
-      msal_cert: '$(YOUR_SECRETS_FILTER_NAME)'
-      msal_client_ID: 'YOUR_MSAL_CLIENT_ID'
-      package_path: '$(System.ArtifactsDirectory)/...'
-      repository: 'YOUR_REPO_NAME_OR_ID'
-      release: 'YOUR_REPO_RELEASE_NAME'
+    # Fix go 1.17 link
+    sudo ln -vsf /usr/lib/go-1.17/bin/go /usr/bin/go
+
+    # Install Docker
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sudo sh get-docker.sh
+    sudo usermod -aG docker $USER
+  displayName: "Install Dependencies"
+  
+- script: |
+    # test
+    asdas
+  displayName: "sdfdf"
+
+- task: DownloadPipelineArtifact@2 # Download your debs/rpms from your build pipeline
+  inputs:
+    buildType: 'specific'
+    project: 'b32aa71e-8ed2-41b2-9d77-5bc261222004' # This example is msazure/One
+    definition: '0000' # use the ID that's present in the URL for your build pipeline
+    buildVersionToDownload: 'latest'
+    targetPath: '$(System.ArtifactsDirectory)'
+
+- task: EsrpCodeSigning@4
+  inputs:
+    ConnectedServiceName: 'ESRP Code Signing Conn'
+    FolderPath: 'src\myapp\$(BuildConfiguration)\Release'
+    Pattern: '*.rpm,*.deb'
+    signConfigType: 'inlineSignParams'
+    inlineOperation: |
+      [
+      {
+        "KeyCode": "CP-459159-Pgp",
+        "OperationCode": "LinuxSign",
+        "ToolName": "sign",
+        "ToolVersion": "1.0",
+        "Parameters": {}
+      }
+      ]
+    SessionTimeout: '60'
+    MaxConcurrency: '50'
+    MaxRetryAttempts: '5'
+    PendingAnalysisWaitTimeoutMinutes: '5'
