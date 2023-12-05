@@ -29,10 +29,6 @@ steps:
     sudo usermod -aG docker $USER
   displayName: "Install Dependencies"
   
-- script: |
-    # test
-    asdas
-  displayName: "sdfdf"
 
 - task: DownloadPipelineArtifact@2 # Download your debs/rpms from your build pipeline
   inputs:
