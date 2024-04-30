@@ -8,6 +8,7 @@ import logging
 import os
 import pickle
 import subprocess
+import tempfile
 import zlib
 from typing import Dict, List
 
@@ -108,7 +109,7 @@ class ACPIUpdate:
     def update_dsl(self):
         if len(self.updates) + len(self.appends) == 0:
             return
-        newdir = os.path.dirname(self.dslpath) + "-new"
+        newdir = tempfile.mkdtemp("-new")
         if not os.path.exists(newdir):
             os.mkdir(newdir)
         newdsl = os.path.join(newdir, os.path.basename(self.dslpath))
