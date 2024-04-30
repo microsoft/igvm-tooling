@@ -19,7 +19,6 @@ setup(
     install_requires=[
         "ecdsa",
         "cstruct",
-        "libclang",
         "pyelftools",
         "pytest",
         "cached_property",
