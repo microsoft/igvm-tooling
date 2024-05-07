@@ -438,13 +438,14 @@ class IGVMFile(VMState):
     def dump(raw):
         return IGVMHeaders.dump(raw)
 
-    def __init__(self, boot_mode: ARCH, config_path: Optional[str], pem: Optional[bytes], encrypted_page: bool, svme: bool):
+    def __init__(self, boot_mode: ARCH, config_path: Optional[str], pem: Optional[bytes], sign_deterministic: bool, encrypted_page: bool, svme: bool):
         VMState.__init__(self, encrypted_page, svme, boot_mode)
         self.skipped_regions: List[Tuple] = []
         self._not_validated_regions: List[Tuple] = []
         self._config_path = config_path
         self._sign_key_pem = pem
         self._sign_key = None
+        self.sign_deterministic = sign_deterministic
 
     @cached_property
     def config(self) -> TEIConfig:
@@ -558,7 +559,8 @@ class IGVMFile(VMState):
                              self.config.version,
                              self.config.guest_svn,
                              self.config.policy)
-        r, s = self.sign_key.sign(
+        signer = self.sign_key.sign_deterministic if self.sign_deterministic else self.sign_key.sign 
+        r, s = signer(
             bytearray(block), sigencode=lambda r, s, o: (r, s))
 
         signature = IGVM_VHS_SNP_ID_BLOCK_SIGNATURE(

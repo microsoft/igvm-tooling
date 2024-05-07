@@ -120,6 +120,12 @@ def main(argv=None):
         required=False
     )
     parser.add_argument(
+        '-sign_deterministic',
+        type=str2bool,
+        default=False,
+        help='Enables deterministic id block signing using RFC6979 deterministic ECDSA instead of using a random k value'
+    )
+    parser.add_argument(
         '-acpi_dir',
         type=str,
         help='ACPI folder',

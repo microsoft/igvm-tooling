@@ -18,12 +18,14 @@ class IGVMBaseGenerator(object):
         # Init IGVMFile state
         config = kwargs["config"] if "config" in kwargs else None
         sign_key = kwargs["sign_key"] if "sign_key" in kwargs else None
+        sign_deterministic = kwargs["sign_deterministic"] if "sign_deterministic" in kwargs else False
         pem = sign_key.read() if sign_key else None
         boot_mode = kwargs["boot_mode"]
         self.arch = kwargs["arch"]
         self.state: IGVMFile = IGVMFile(boot_mode=boot_mode,
                                         config_path=config,
                                         pem=pem,
+                                        sign_deterministic=sign_deterministic,
                                         encrypted_page=kwargs["encrypted_page"],
                                         svme=kwargs["svme"])
         self.cpuid_page: int = 0
