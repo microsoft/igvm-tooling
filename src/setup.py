@@ -24,5 +24,6 @@ setup(
         "pytest",
         "cached_property",
         "frozendict",
+        "setuptools",
     ]
 )
