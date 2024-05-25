@@ -6,7 +6,6 @@ import sys
 import json
 import logging
 
-from distutils.log import INFO
 from enum import Enum
 from frozendict import frozendict
 
