@@ -499,6 +499,8 @@ class IGVMFile(VMState):
                         (CpuIdFunctionExtendedStateEnumeration, 6),
                         (CpuIdFunctionExtendedStateEnumeration, 7),
                         (CpuIdFunctionExtendedStateEnumeration, 8),
+                        (CpuIdFunctionExtendedStateEnumeration, 11),
+                        (CpuIdFunctionExtendedStateEnumeration, 12),
                         (CpuIdFunctionExtendedBrandingString1, 0),
                         (CpuIdFunctionExtendedBrandingString2, 0),
                         (CpuIdFunctionExtendedBrandingString3, 0),
